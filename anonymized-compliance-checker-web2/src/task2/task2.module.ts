@@ -2,7 +2,7 @@ import { Module } from "@nestjs/common"
 import { Task2Controller } from "./task2.controller"
 import { Task2Service } from "./task2.service"
 import { TypeOrmModule } from "@nestjs/typeorm"
-import { Inventory } from "src/task1/task1.entity"
+import { Inventory } from "src/db/inventory.entity"
 
 @Module({
     imports:[TypeOrmModule.forFeature([Inventory])],
