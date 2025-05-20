@@ -39,9 +39,9 @@ export class Task2Service {
         try {
             const contract = this.task2ContractService.getContract()
             await contract.validate(dateObjs)
-            console.log("Passed validation.")
+            return {"resCode":200};
         } catch (err) {
-            console.error("Validation failed")
+            return {"resCode":500};
         }
     }
 }
