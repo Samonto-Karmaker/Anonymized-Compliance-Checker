@@ -1,5 +1,5 @@
 const {network}=require("hardhat");
-
+const {verify}=require("../utils/verify");
 
 module.exports=async({getNamedAccounts,deployments})=>{
     const {deploy,log}=deployments;
@@ -18,6 +18,10 @@ module.exports=async({getNamedAccounts,deployments})=>{
     });
 
     log("Contract deployed at => ",taskTwo.address);
+
+    // if(!developmentChains.includes(network.name)){
+    //     await verify(fundMe.address,arguments);
+    // }
 
 }
 

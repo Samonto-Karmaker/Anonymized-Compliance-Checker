@@ -1,7 +1,7 @@
 import { DataSource } from 'typeorm';
 import { faker } from '@faker-js/faker';
 import * as dotenv from 'dotenv';
-import { inventory } from './src/db/inventory.entity';
+import { Inventory} from './src/task1/task1.entity';
 dotenv.config();
 
 async function seed() {
@@ -12,13 +12,13 @@ async function seed() {
     username: process.env.DB_USERNAME || 'postgres',
     password: process.env.DB_PASSWORD || '',
     database: process.env.DB_NAME || 'inventory_db',
-    entities: [inventory],
-    synchronize: false,
+    entities: [Inventory],
+    synchronize: true,
   });
 
   await dataSource.initialize();
 
-  const repo = dataSource.getRepository(inventory);
+  const repo = dataSource.getRepository(Inventory);
 
   for (let i = 0; i < 100; i++) {
     const item = repo.create({
