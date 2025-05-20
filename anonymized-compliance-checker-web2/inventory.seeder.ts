@@ -1,7 +1,7 @@
 import { DataSource } from 'typeorm';
 import { faker } from '@faker-js/faker';
 import * as dotenv from 'dotenv';
-import { Inventory} from './src/task1/task1.entity';
+import { Inventory} from 'src/db/inventory.entity';
 dotenv.config();
 
 async function seed() {
