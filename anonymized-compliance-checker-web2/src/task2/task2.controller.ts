@@ -11,6 +11,14 @@ export class Task2Controller {
         const total=await this.task2Service.getRowCount();
         const batchSize=5;
         const totalBatch=Math.ceil(total/batchSize);
-        // const 
+        for(let i=1;i<=totalBatch;i++){
+            await this.task2Service.getDatesInBatch(i,batchSize);
+        }
     }
+
+    @Get("/test")
+    async test(){
+        return "Running.";
+    }
+
 }

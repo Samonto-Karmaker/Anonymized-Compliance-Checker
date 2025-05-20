@@ -4,12 +4,12 @@ import { abi } from "./task2.abi"
 
 @Injectable()
 export class Task2ContractService {
-    private readonly contractAddress = "0xYourContractAddress"
+    private readonly contractAddress = process.env.CONTRACT_ADDRESS || ""
 
     private readonly abi = abi
 
     private readonly provider = new ethers.JsonRpcProvider(
-        "https://your_rpc_url"
+        process.env.SEPOLIA_RPC_URL
     )
 
     private readonly contract = new ethers.Contract(
