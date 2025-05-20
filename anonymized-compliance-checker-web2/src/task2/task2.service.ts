@@ -12,36 +12,37 @@ export class Task2Service {
         private task2ContractService: Task2ContractService
     ) {}
 
-    async getRowCount(): Promise<number> {
-        return this.inventoryRepo.count()
-    }
-
     private toUnix(date: Date | null): number {
         return date ? Math.floor(new Date(date).getTime() / 1000) : 0
     }
 
-    async getDatesInBatch(batchNumber: number, batchSize: number) {
-        const skip = (batchNumber - 1) * batchSize
-        const batch = await this.inventoryRepo.find({
-            skip,
-            take: batchSize,
-            select: ["id", "dateOfExpiry", "dateOfDisbursement"],
-            order: { id: "ASC" },
-        })
+    async getDatesInBatch(batchSize: number) {
+        const total = await this.inventoryRepo.count()
+        const totalBatch = Math.ceil(total / batchSize)
 
-        const dateObjs = batch
-            .filter(i => i.dateOfDisbursement && i.dateOfExpiry)
-            .map(item => ({
-                expiryDate: this.toUnix(item.dateOfExpiry),
-                disbursedDate: this.toUnix(item.dateOfDisbursement),
-            }))
+        for (let batchNumber = 1; batchNumber <= totalBatch; batchNumber++) {
+            const skip = (batchNumber - 1) * batchSize
+            const batch = await this.inventoryRepo.find({
+                skip,
+                take: batchSize,
+                select: ["id", "dateOfExpiry", "dateOfDisbursement"],
+                order: { id: "ASC" },
+            })
 
-        try {
-            const contract = this.task2ContractService.getContract()
-            await contract.validate(dateObjs)
-            return {"resCode":200};
-        } catch (err) {
-            return {"resCode":500};
+            const dateObjs = batch
+                .filter(i => i.dateOfDisbursement && i.dateOfExpiry)
+                .map(item => ({
+                    expiryDate: this.toUnix(item.dateOfExpiry),
+                    disbursedDate: this.toUnix(item.dateOfDisbursement),
+                }))
+
+            try {
+                const contract = this.task2ContractService.getContract()
+                await contract.validate(dateObjs)
+            } catch (err) {
+                return { msg: `Validation failed for batch no ${batchNumber}.` }
+            }
         }
+        return { msg: "Validation passed." }
     }
 }
