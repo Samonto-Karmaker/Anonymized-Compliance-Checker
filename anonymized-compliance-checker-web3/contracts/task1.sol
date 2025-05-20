@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-contract InventoryCompliance {
+contract Task1 {
     mapping(bytes32 => bool) private blacklistedFields;
     address public owner;
     constructor() {
         owner = msg.sender;
-        
+
         // Initialize blacklisted fields
         blacklistedFields[0x5D3575D1A0AB5B2F5EE09A5E4FBAE19BCAA9F9343659AA29603B2CBC9AB5D99D] = true;
         blacklistedFields[0x139D14B61CAE91C759A05E3F8ECE2128CDC1B43D95FD48B9038000D9C1C9C178] = true;
