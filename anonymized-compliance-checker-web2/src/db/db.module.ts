@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import * as dotenv from 'dotenv';
-import { Inventory } from '../task1/task1.entity';
+import { inventory } from 'src/task1/task1.entity';
 dotenv.config();
 
 @Module({
