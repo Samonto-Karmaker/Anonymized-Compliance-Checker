@@ -16,7 +16,7 @@ export class Task2Service {
         return date ? Math.floor(new Date(date).getTime() / 1000) : 0
     }
 
-    async getDatesInBatch(batchSize: number) {
+    async getDatesInBatch(batchSize: number): Promise<{ msg: string ,code: number}> {
         const total = await this.inventoryRepo.count()
         const totalBatch = Math.ceil(total / batchSize)
 
