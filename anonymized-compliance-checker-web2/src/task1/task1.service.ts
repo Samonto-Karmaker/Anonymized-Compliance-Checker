@@ -20,7 +20,7 @@ export class Task1Service {
       .filter(col => col.target === Inventory)
       .map(col => col.propertyName);
 
-      console.log('Columns to check:', columns);
+      // console.log('Columns to check:', columns);
 
       const hashed = columns.map(name =>
         ethers.sha256(ethers.toUtf8Bytes(name))
