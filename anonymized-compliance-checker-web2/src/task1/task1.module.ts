@@ -6,10 +6,7 @@ import { Task1ContractModule } from "src/contracts/task1/task1.contract.module"
 import { TypeOrmModule } from "@nestjs/typeorm"
 
 @Module({
-     imports: [
-     TypeOrmModule.forFeature([Inventory]),  
-     Task1ContractModule,                     
-  ],
+    imports: [TypeOrmModule.forFeature([Inventory]), Task1ContractModule],
     controllers: [Task1Controller],
     providers: [Task1Service],
 })
