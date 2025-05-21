@@ -11,9 +11,9 @@ export class Task1Service {
     @InjectRepository(Inventory)
     private readonly inventoryRepo: Repository<Inventory>,
     private readonly contractSvc: Task1ContractService,
-  ) {}
+  ) { }
 
-  async checkCompliance(): Promise<{ compliant: boolean }> {
+  async checkCompliance(): Promise<{ msg: string ,code: number}> {
     const items = await this.inventoryRepo.find();
     const names = items.map(i => i.productName);
 
@@ -22,9 +22,12 @@ export class Task1Service {
     );
 
     const contract = this.contractSvc.getContract();
-    const compliant = await contract.isCompliant(hashed);
-
-    console.log('Compliance check result:', compliant);
-    return { compliant };
+    try {
+      const compliant = await contract.isCompliant(hashed);
+      console.log('Compliance check result:', compliant);
+      return { msg: compliant ? 'All fields are compliant.' : 'Some fields are not compliant.', code: 200 };
+    } catch (error) {
+      return { msg: 'Error checking compliance.', code: 400 };
+    }
   }
 }
