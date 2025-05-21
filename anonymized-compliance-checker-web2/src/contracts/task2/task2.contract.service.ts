@@ -4,7 +4,7 @@ import { abi } from "./task2.abi"
 
 @Injectable()
 export class Task2ContractService {
-    private readonly contractAddress = process.env.CONTRACT_ADDRESS_TASK1 || ""
+    private readonly contractAddress = process.env.CONTRACT_ADDRESS_TASK2 || ""
 
     private readonly abi = abi
 

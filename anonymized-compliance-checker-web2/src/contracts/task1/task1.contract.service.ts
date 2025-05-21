@@ -4,7 +4,7 @@ import { abi } from "./task1.abi";
 
 @Injectable()
 export class Task1ContractService {
-  private readonly contractAddress = process.env.CONTRACT_ADDRESS || "";
+  private readonly contractAddress = process.env.CONTRACT_ADDRESS_TASK1 || "";
 
   private readonly abi = abi;
   private readonly provider = new ethers.JsonRpcProvider(
