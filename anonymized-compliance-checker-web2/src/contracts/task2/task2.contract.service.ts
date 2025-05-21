@@ -9,7 +9,7 @@ export class Task2ContractService {
     private readonly abi = abi
 
     private readonly provider = new ethers.JsonRpcProvider(
-        process.env.SEPOLIA_RPC_URL_TASK2
+        process.env.SEPOLIA_RPC_URL
     )
 
     private readonly contract = new ethers.Contract(
