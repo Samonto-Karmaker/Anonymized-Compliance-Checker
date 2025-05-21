@@ -7,13 +7,13 @@ export class Task2Controller {
         private readonly task2Service:Task2Service
     ){}
 
-    @Get("/batches/:batchSize")
+    @Get("batches/:batchSize")
     async getAllBatches(@Param('batchSize') batchSize:string){
         const BatchSize=parseInt(batchSize,10);
         return await this.task2Service.getDatesInBatch(BatchSize);
     }
 
-    @Get("/test")
+    @Get("test")
     async test(){
         return "Running.";
     }
