@@ -16,7 +16,9 @@ export class Task2Service {
         return date ? Math.floor(new Date(date).getTime() / 1000) : 0
     }
 
-    async getDatesInBatch(batchSize: number): Promise<{ msg: string ,code: number}> {
+    async getDatesInBatch(
+        batchSize: number
+    ): Promise<{ msg: string; code: number }> {
         const total = await this.inventoryRepo.count()
         const totalBatch = Math.ceil(total / batchSize)
 
@@ -40,9 +42,12 @@ export class Task2Service {
                 const contract = this.task2ContractService.getContract()
                 await contract.validate(dateObjs)
             } catch (err) {
-                return { msg: `Validation failed for batch no ${batchNumber}!`, code:400 }
+                return {
+                    msg: `Validation failed for batch no ${batchNumber}!`,
+                    code: 400,
+                }
             }
         }
-        return { msg: "Validation passed.",code:200 }
+        return { msg: "Validation passed.", code: 200 }
     }
 }
