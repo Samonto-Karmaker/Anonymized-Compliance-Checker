@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ethers } from 'ethers';
+import {getMetadataArgsStorage} from 'typeorm'
 import { Inventory } from 'src/db/inventory.entity';
 import { Task1ContractService } from 'src/contracts/task1/task1.contract.service';
 
@@ -14,12 +15,16 @@ export class Task1Service {
   ) { }
 
   async checkCompliance(): Promise<{ msg: string ,code: number}> {
-    const items = await this.inventoryRepo.find();
-    const names = items.map(i => i.productName);
+      const columns = getMetadataArgsStorage()
+      .columns
+      .filter(col => col.target === Inventory)
+      .map(col => col.propertyName);
 
-    const hashed = names.map(n =>
-      ethers.sha256(ethers.toUtf8Bytes(n))
-    );
+      console.log('Columns to check:', columns);
+
+      const hashed = columns.map(name =>
+        ethers.sha256(ethers.toUtf8Bytes(name))
+      );
 
     const contract = this.contractSvc.getContract();
     try {
