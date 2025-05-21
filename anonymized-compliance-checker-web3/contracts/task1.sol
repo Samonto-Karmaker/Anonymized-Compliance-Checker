@@ -1,9 +1,19 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+/// @title Task 1 GDPR Compliance Validator
+/// @author Omitul Islam
+/// @notice Validates that provided hashed field names are not in the predefined blacklist
+/// @dev Uses a mapping of hashed field names to determine non-compliance
+
 contract Task1 {
+    /// @notice Mapping to store blacklisted (non-compliant) field hashes
     mapping(bytes32 => bool) private blacklistedFields;
+
+    /// @notice The address of the contract deployer (owner)
     address public owner;
+
+    /// @notice Initializes the contract, sets the owner, and populates the blacklist with hardcoded hashes
     constructor() {
         owner = msg.sender;
 
@@ -23,7 +33,10 @@ contract Task1 {
         blacklistedFields[0xA0F654C753E25A17A44DA09F3D1EA0DA1699352F70FC9676BD1988CC42C77F9C] = true;
         blacklistedFields[0x6506DA55E434CC2750E73A988466A1E79A6DBECBF7DB7E0B0B1A9A4E6B255990] = true;
     }
-    
+
+    /// @notice Checks if any of the provided field hashes are blacklisted
+    /// @param fieldHashes An array of hashed field names to check for GDPR compliance
+    /// @return Returns false if any field is blacklisted, true otherwise!
     function isCompliant(bytes32[] calldata fieldHashes) external view returns (bool) {
         for (uint i = 0; i < fieldHashes.length; i++) {
             if (blacklistedFields[fieldHashes[i]]) {
