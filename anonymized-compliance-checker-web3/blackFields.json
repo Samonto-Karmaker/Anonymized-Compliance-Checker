@@ -1,0 +1,11 @@
+[
+  "race", "ethnicity", "ethnic_origin",
+  "political_view", "party_affiliation",
+  "religion", "faith", "beliefs",
+  "union_member", "labor_union",
+  "dna_data", "genetic_info", "genetic_code",
+  "fingerprint", "iris_scan", "face_scan", "voice_pattern",
+  "medical_history", "health_status", "disability",
+  "sexual_orientation", "sexual_preference",
+  "sex_life", "partner_gender"
+]
