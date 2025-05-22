@@ -9,7 +9,12 @@ task2CheckBtn.onclick = checkTask2;
 
 const backend_url = "http://localhost:3000";
 
+const loadingSpinner = `<div class="spinner-border spinner-border-sm m-1" role="status">
+  <span class="visually-hidden">Loading...</span>
+</div>`
+
 async function checkTask1() {
+    task1CheckBtn.innerHTML = loadingSpinner;
     try {
         const response = await fetch(`${backend_url}/task1/check-compliance`);
         const data = await response.json();
@@ -23,9 +28,11 @@ async function checkTask1() {
         console.log("Task1 Error => ", error);
         result1.innerHTML = "Interval Server Error!";
     }
+    task1CheckBtn.innerHTML = "Check";
 }
 
 async function checkTask2() {
+    task2CheckBtn.innerHTML = loadingSpinner;
     try {
         const batchSize = parseInt(
             document.getElementById("batch-size").value || 5,
@@ -43,4 +50,5 @@ async function checkTask2() {
         console.log("Task1 Error => ", error);
         result2.innerHTML = "Interval Server Error!";
     }
+    task2CheckBtn.innerHTML = "Check";
 }
