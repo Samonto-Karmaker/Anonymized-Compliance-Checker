@@ -2,6 +2,7 @@ import { Module } from "@nestjs/common"
 import { TypeOrmModule } from "@nestjs/typeorm"
 import * as dotenv from "dotenv"
 import { Inventory } from "src/db/inventory.entity"
+import { BatchInfo } from "./batchInfo.entity"
 dotenv.config()
 
 @Module({
@@ -13,10 +14,10 @@ dotenv.config()
             username: process.env.DB_USERNAME || "postgres",
             password: process.env.DB_PASSWORD || "",
             database: process.env.DB_NAME || "inventory_db",
-            entities: [Inventory],
+            entities: [Inventory, BatchInfo],
             synchronize: true,
         }),
-        TypeOrmModule.forFeature([Inventory]),
+        TypeOrmModule.forFeature([Inventory, BatchInfo]),
     ],
     exports: [TypeOrmModule],
 })
