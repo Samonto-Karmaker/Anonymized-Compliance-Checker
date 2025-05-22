@@ -6,16 +6,16 @@ import { Inventory } from './src/db/inventory.entity';
 dotenv.config();
 
 async function seed() {
-  const dataSource = new DataSource({
-    type: 'postgres',
-    host: process.env.DB_HOST || 'localhost',
-    port: process.env.DB_PORT ? parseInt(process.env.DB_PORT) : 5432,
-    username: process.env.DB_USERNAME || 'postgres',
-    password: process.env.DB_PASSWORD || '',
-    database: process.env.DB_NAME || 'inventory_db',
-    entities: [Inventory],
-    synchronize: true,
-  });
+    const dataSource = new DataSource({
+        type: "postgres",
+        host: process.env.DB_HOST || "localhost",
+        port: process.env.DB_PORT ? parseInt(process.env.DB_PORT) : 5432,
+        username: process.env.DB_USERNAME || "postgres",
+        password: process.env.DB_PASSWORD || "",
+        database: process.env.DB_NAME || "inventory_db",
+        entities: [Inventory],
+        synchronize: true,
+    })
 
   await dataSource.initialize();
   const repo = dataSource.getRepository(Inventory);
@@ -41,4 +41,4 @@ async function seed() {
   console.log('Seeding complete from JSON!');
 }
 
-seed().catch(console.error);
+seed().catch(console.error)
