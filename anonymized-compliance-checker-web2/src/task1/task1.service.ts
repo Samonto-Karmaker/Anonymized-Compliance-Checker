@@ -1,11 +1,10 @@
-
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import crypto from 'crypto';
-import {getMetadataArgsStorage} from 'typeorm'
-import { Inventory } from 'src/db/inventory.entity';
-import { Task1ContractService } from 'src/contracts/task1/task1.contract.service';
+import { Injectable } from "@nestjs/common"
+import { InjectRepository } from "@nestjs/typeorm"
+import { Repository } from "typeorm"
+import crypto from "crypto"
+import { getMetadataArgsStorage } from "typeorm"
+import { Inventory } from "src/db/inventory.entity"
+import { Task1ContractService } from "src/contracts/task1/task1.contract.service"
 
 @Injectable()
 export class Task1Service {
@@ -22,9 +21,10 @@ export class Task1Service {
 
         // console.log('Columns to check:', columns);
 
-       const hashed = columns.map(name =>
-      '0x' + crypto.createHash('sha256').update(name).digest('hex')
-       );
+        const hashed = columns.map(
+            name =>
+                "0x" + crypto.createHash("sha256").update(name).digest("hex")
+        )
 
         const contract = this.contractSvc.getContract()
         try {
