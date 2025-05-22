@@ -14,7 +14,11 @@ const loadingSpinner = `<div class="spinner-border spinner-border-sm m-1" role="
 </div>`
 
 async function checkTask1() {
-    task1CheckBtn.innerHTML = loadingSpinner;
+    task1CheckBtn.disabled = true;
+    task1CheckBtn.innerHTML = `
+      <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+      Checking...
+    `;
     try {
         const response = await fetch(`${backend_url}/task1/check-compliance`);
         const data = await response.json();
@@ -26,13 +30,21 @@ async function checkTask1() {
         }
     } catch (error) {
         console.log("Task1 Error => ", error);
-        result1.innerHTML = "Interval Server Error!";
+        result1.innerHTML = "Internal Server Error!";
+    } finally {
+        task1CheckBtn.disabled = false;
+        task1CheckBtn.innerHTML = "Check";
     }
     task1CheckBtn.innerHTML = "Check";
 }
 
+
 async function checkTask2() {
-    task2CheckBtn.innerHTML = loadingSpinner;
+    task2CheckBtn.disabled = true;
+    task2CheckBtn.innerHTML = `
+      <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+      Checking...
+    `;
     try {
         const batchSize = parseInt(
             document.getElementById("batch-size").value || 5,
@@ -47,8 +59,10 @@ async function checkTask2() {
             result2.innerHTML = `<b>Result: </b><span class="text-danger">${data.msg}</span>`;
         }
     } catch (error) {
-        console.log("Task1 Error => ", error);
-        result2.innerHTML = "Interval Server Error!";
+        console.log("Task2 Error => ", error);
+        result2.innerHTML = "Internal Server Error!";
+    } finally {
+        task2CheckBtn.disabled = false;
+        task2CheckBtn.innerHTML = "Check";
     }
-    task2CheckBtn.innerHTML = "Check";
 }
