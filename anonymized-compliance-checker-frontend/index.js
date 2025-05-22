@@ -9,6 +9,10 @@ task2CheckBtn.onclick = checkTask2;
 
 const backend_url = "http://localhost:3000";
 
+const loadingSpinner = `<div class="spinner-border spinner-border-sm m-1" role="status">
+  <span class="visually-hidden">Loading...</span>
+</div>`
+
 async function checkTask1() {
     task1CheckBtn.disabled = true;
     task1CheckBtn.innerHTML = `
@@ -31,6 +35,7 @@ async function checkTask1() {
         task1CheckBtn.disabled = false;
         task1CheckBtn.innerHTML = "Check";
     }
+    task1CheckBtn.innerHTML = "Check";
 }
 
 
