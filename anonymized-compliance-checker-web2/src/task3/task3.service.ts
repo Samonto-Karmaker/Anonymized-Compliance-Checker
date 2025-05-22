@@ -1,4 +1,9 @@
-import { Injectable, InternalServerErrorException } from "@nestjs/common"
+import {
+    BadRequestException,
+    Injectable,
+    InternalServerErrorException,
+    NotFoundException,
+} from "@nestjs/common"
 import { Repository } from "typeorm"
 import { InjectRepository } from "@nestjs/typeorm"
 import { Inventory } from "src/db/inventory.entity"
@@ -30,6 +35,52 @@ export class Task3Service {
             console.error("Error creating inventory:", error)
             throw new InternalServerErrorException(
                 "Error creating inventory. Please try again later."
+            )
+        }
+    }
+    async updateDisbursementDate(
+        inventoryId: number,
+        date: Date
+    ): Promise<Inventory> {
+        if (!date) {
+            throw new BadRequestException("Date is required")
+        }
+        try {
+            const inventory = await this.inventoryRepository.findOne({
+                where: { id: inventoryId },
+                select: ["id", "dateOfDisbursement", "dateOfProcurement"],
+            })
+            if (!inventory) {
+                throw new NotFoundException(
+                    `Inventory with ID ${inventoryId} not found`
+                )
+            }
+            if (inventory.dateOfDisbursement) {
+                throw new BadRequestException(
+                    `Inventory with ID ${inventoryId} already has a disbursement date`
+                )
+            }
+            if (date < inventory.dateOfProcurement) {
+                throw new BadRequestException(
+                    `Disbursement date cannot be earlier than procurement date`
+                )
+            }
+
+            inventory.dateOfDisbursement = date
+            const updatedInventory =
+                await this.inventoryRepository.save(inventory)
+
+            return updatedInventory
+        } catch (error) {
+            console.error("Error updating disbursement date:", error)
+            if (
+                error instanceof NotFoundException ||
+                error instanceof BadRequestException
+            ) {
+                throw error
+            }
+            throw new InternalServerErrorException(
+                "Error updating disbursement date. Please try again later."
             )
         }
     }
