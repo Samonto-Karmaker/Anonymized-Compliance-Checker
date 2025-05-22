@@ -1,7 +1,8 @@
 import { DataSource } from 'typeorm';
-import { faker } from '@faker-js/faker';
 import * as dotenv from 'dotenv';
-import { Inventory} from 'src/db/inventory.entity';
+import * as fs from 'fs';
+import { Inventory } from './src/db/inventory.entity';
+
 dotenv.config();
 
 async function seed() {
@@ -17,26 +18,27 @@ async function seed() {
   });
 
   await dataSource.initialize();
-
   const repo = dataSource.getRepository(Inventory);
 
-  for (let i = 0; i < 100; i++) {
-    const item = repo.create({
-      productId: faker.string.uuid(),
-      productName: faker.commerce.productName(),
-      quantity: faker.number.int({ min: 1, max: 100 }),
-      price: parseFloat(faker.commerce.price()),
-      dateOfExpiry: faker.date.future(),
-      dateOfProcurement: faker.date.past(),
-      dateOfDisbursement: Math.random() > 0.5 ? faker.date.recent() : null,
-      vendorName: faker.company.name(),
-    });
+  const rawData = fs.readFileSync('seedData.json', 'utf-8');
+  const data = JSON.parse(rawData);
 
+  for (const itemData of data) {
+    const item = repo.create({
+      productId: itemData.productId,
+      productName: itemData.productName,
+      quantity: itemData.quantity,
+      price: itemData.price,
+      dateOfExpiry: new Date(itemData.dateOfExpiry),
+      dateOfProcurement: new Date(itemData.dateOfProcurement),
+      dateOfDisbursement: new Date(itemData.dateOfDisbursement),
+      vendorName: itemData.vendorName,
+    });
     await repo.save(item);
   }
 
   await dataSource.destroy();
-  console.log('Seeding complete!');
+  console.log('Seeding complete from JSON!');
 }
 
 seed().catch(console.error);
