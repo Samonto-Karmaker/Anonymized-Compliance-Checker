@@ -7,7 +7,7 @@ import { Task3Module } from "./task3/task3.module"
 import { DatabaseModule } from "./db/db.module"
 
 @Module({
-    imports: [ DatabaseModule ,Task1Module, Task2Module, Task3Module],
+    imports: [DatabaseModule, Task1Module, Task2Module, Task3Module],
     controllers: [AppController],
     providers: [AppService],
 })
