@@ -9,6 +9,7 @@ import { InjectRepository } from "@nestjs/typeorm"
 import { Inventory } from "src/db/inventory.entity"
 import { BatchInfo } from "src/db/batchInfo.entity"
 import { CreateInventoryDto } from "src/dto/create-inventory"
+import { Cron, CronExpression } from "@nestjs/schedule"
 
 @Injectable()
 export class Task3Service {
@@ -83,5 +84,10 @@ export class Task3Service {
                 "Error updating disbursement date. Please try again later."
             )
         }
+    }
+
+    @Cron(CronExpression.EVERY_30_SECONDS)
+    handleCron() {
+        console.log(`Cron job running at ${new Date().toISOString()}`)
     }
 }
