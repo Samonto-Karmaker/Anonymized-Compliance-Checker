@@ -41,6 +41,7 @@ export class BatchService {
             )
             .where("batchInfo.inventoryId IS NULL")
             .orWhere("batchInfo.creationBatchId IS NULL")
+            .orderBy("inventory.id", "ASC")
             .getMany()
     }
 
@@ -55,6 +56,7 @@ export class BatchService {
             .where("batchInfo.creationBatchId IS NOT NULL")
             .andWhere("inventory.dateOfDisbursement IS NOT NULL")
             .andWhere("batchInfo.updateBatchId IS NULL")
+            .orderBy("inventory.id", "ASC")
             .getMany()
     }
 
@@ -78,6 +80,7 @@ export class BatchService {
 
         const inventories = await this.inventoryRepository.find({
             where: { id: In(inventoryIds) },
+            order: { id: "ASC" },
         })
 
         if (!inventories.length) {
