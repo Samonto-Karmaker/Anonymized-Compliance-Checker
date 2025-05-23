@@ -97,10 +97,15 @@ export class Task3Service implements OnModuleInit {
             ? CronExpression.EVERY_30_SECONDS
             : CronExpression.EVERY_10_SECONDS
         this.addCronJob("sync-db-with-contact", cronTime)
+
+        if (!isProd) {
+            console.log(`Cron job is running in development mode`)
+            this.handleCron()
+        }
     }
 
     // This method is used to register a cron job
-    addCronJob(name: string, cronTime: string) {
+    private addCronJob(name: string, cronTime: string) {
         const job = new CronJob(cronTime, () => {
             this.handleCron()
         })
@@ -110,7 +115,7 @@ export class Task3Service implements OnModuleInit {
     }
 
     // This method is called when the cron job is triggered
-    handleCron() {
+    private handleCron() {
         console.log(`Cron job running at ${new Date().toISOString()}`)
     }
 }
