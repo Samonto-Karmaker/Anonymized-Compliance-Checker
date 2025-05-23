@@ -23,14 +23,26 @@ export class BatchService {
         return batchInfo
     }
     async getInventoryByCreationBatchId(id: number): Promise<Inventory[]> {
+        return this.getInventoriesByBatchField("creationBatchId", id)
+    }
+
+    async getInventoryByUpdateBatchId(id: number): Promise<Inventory[]> {
+        return this.getInventoriesByBatchField("updateBatchId", id)
+    }
+
+    // Helper functions
+    private async getInventoriesByBatchField(
+        batchField: "creationBatchId" | "updateBatchId",
+        id: number
+    ): Promise<Inventory[]> {
         const batchInfos = await this.batchInfoRepository.find({
-            where: { creationBatchId: id },
+            where: { [batchField]: id },
             select: ["inventoryId"],
         })
 
-        if (!batchInfos?.length) {
+        if (!batchInfos.length) {
             throw new NotFoundException(
-                `No inventories found for creationBatchId ${id}`
+                `No inventories found for ${batchField} ${id}`
             )
         }
 
@@ -40,9 +52,9 @@ export class BatchService {
             where: { id: In(inventoryIds) },
         })
 
-        if (!inventories?.length) {
+        if (!inventories.length) {
             throw new NotFoundException(
-                `No inventories found for creationBatchId ${id}`
+                `No inventories found for ${batchField} ${id}`
             )
         }
 
