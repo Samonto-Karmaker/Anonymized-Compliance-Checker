@@ -13,7 +13,7 @@ import { CreateInventoryDto } from "src/dto/create-inventory"
 export class InventoryService {
     constructor(
         @InjectRepository(Inventory)
-        private readonly inventoryRepository: Repository<Inventory>,
+        private readonly inventoryRepository: Repository<Inventory>
     ) {}
 
     async getInventory(): Promise<Inventory[]> {
