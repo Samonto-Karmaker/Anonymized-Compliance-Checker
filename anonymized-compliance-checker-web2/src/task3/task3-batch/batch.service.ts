@@ -25,7 +25,6 @@ export class BatchService {
     async getInventoryByCreationBatchId(id: number): Promise<Inventory[]> {
         return this.getInventoriesByBatchField("creationBatchId", id)
     }
-
     async getInventoryByUpdateBatchId(id: number): Promise<Inventory[]> {
         return this.getInventoriesByBatchField("updateBatchId", id)
     }
