@@ -7,12 +7,12 @@ import {
     Patch,
     Post,
 } from "@nestjs/common"
-import { Task3Service } from "./task3.service"
+import { InventoryService } from "./task3-inventory/inventory.service"
 import { CreateInventoryDto } from "src/dto/create-inventory"
 
 @Controller("task3")
 export class Task3Controller {
-    constructor(private readonly task3Service: Task3Service) {}
+    constructor(private readonly task3Service: InventoryService) {}
 
     @Get("all")
     getInventory() {
