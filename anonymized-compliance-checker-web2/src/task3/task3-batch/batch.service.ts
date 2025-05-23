@@ -22,11 +22,42 @@ export class BatchService {
         }
         return batchInfo
     }
+
     async getInventoryByCreationBatchId(id: number): Promise<Inventory[]> {
         return this.getInventoriesByBatchField("creationBatchId", id)
     }
+
     async getInventoryByUpdateBatchId(id: number): Promise<Inventory[]> {
         return this.getInventoriesByBatchField("updateBatchId", id)
+    }
+
+    async getUntrackedInventories(): Promise<Inventory[]> {
+        return this.inventoryRepository
+            .createQueryBuilder("inventory")
+            .leftJoin(
+                "batch_info",
+                "batchInfo",
+                "batchInfo.inventoryId = inventory.id"
+            )
+            .where("batchInfo.inventoryId IS NULL")
+            .orWhere("batchInfo.creationBatchId IS NULL")
+            .orderBy("inventory.id", "ASC")
+            .getMany()
+    }
+
+    async getInventoriesReadyForUpdateTracking(): Promise<Inventory[]> {
+        return this.inventoryRepository
+            .createQueryBuilder("inventory")
+            .innerJoin(
+                "batch_info",
+                "batchInfo",
+                "batchInfo.inventoryId = inventory.id"
+            )
+            .where("batchInfo.creationBatchId IS NOT NULL")
+            .andWhere("inventory.dateOfDisbursement IS NOT NULL")
+            .andWhere("batchInfo.updateBatchId IS NULL")
+            .orderBy("inventory.id", "ASC")
+            .getMany()
     }
 
     // Helper functions
@@ -49,6 +80,7 @@ export class BatchService {
 
         const inventories = await this.inventoryRepository.find({
             where: { id: In(inventoryIds) },
+            order: { id: "ASC" },
         })
 
         if (!inventories.length) {
