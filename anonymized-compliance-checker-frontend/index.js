@@ -15,6 +15,7 @@ const loadingSpinner = `<div class="spinner-border spinner-border-sm m-1" role="
 
 async function checkTask1() {
     task1CheckBtn.disabled = true;
+    result1.innerHTML="";
     task1CheckBtn.innerHTML = `
       <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
       Checking...
@@ -41,6 +42,7 @@ async function checkTask1() {
 
 async function checkTask2() {
     task2CheckBtn.disabled = true;
+    result2.innerHTML="";
     task2CheckBtn.innerHTML = `
       <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
       Checking...
