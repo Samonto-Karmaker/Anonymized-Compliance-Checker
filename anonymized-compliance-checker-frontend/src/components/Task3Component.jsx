@@ -25,9 +25,12 @@ const Task3Component = () => {
 
   return (
     <div className="max-w-2xl mx-auto py-10 px-4">
-      <h1 className="font-semibold text-gray-700 mb-2">
-        Update disbursement date
+      <h1 className="text-2xl font-bold text-gray-800 mb-6">
+        Task 3
       </h1>
+      <p className="font-semibold text-gray-700 mb-2">
+        Update disbursement date
+      </p>
       <div className="bg-white p-6 rounded-lg shadow-md">
         <div className="mb-4">
           <div className="flex flex-col gap-4 w-full">
