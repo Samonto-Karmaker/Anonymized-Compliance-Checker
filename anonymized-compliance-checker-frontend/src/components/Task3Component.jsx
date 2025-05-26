@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useUpdateTask3Mutation } from "../services/contract_api";
 
 const Task3Component = () => {
   const [id, setId] = useState("");
@@ -6,6 +7,7 @@ const Task3Component = () => {
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState("idle");
   const [message, setMessage] = useState("");
+  const [updateTask3, { isLoading: loadingUpdate }] = useUpdateTask3Mutation();
 
   const handleUpdate = async () => {
     setLoading(true);
@@ -13,12 +15,19 @@ const Task3Component = () => {
     setStatus("idle");
 
     try {
-      console.log(id,disbursementDate);
-      setStatus("success");
-      setMessage("Disbursement date updated successfully.");
-    } catch (error) {
-      setStatus("error");
-      setMessage(error.message || "Failed to update.");
+        console.log(id,disbursementDate);
+        const response = await updateTask3({id, data: { date: disbursementDate }}).unwrap();
+        setStatus(response.message || "Updated successfully");
+        setMessage("Disbursement date updated successfully.");
+      } catch (error) {
+        console.log(id,disbursementDate);
+
+       setStatus("error");
+       if (error?.data?.message) {
+       setMessage(error.data.message); 
+    } else {
+       setMessage("Failed to update. The date might already exist.");
+    }
     }
     setLoading(false);
   };
@@ -70,14 +79,14 @@ const Task3Component = () => {
             <button
               type="button"
               onClick={handleUpdate}
-              disabled={loading}
+              disabled={loadingUpdate}
               className={`w-full px-3 py-2 text-sm text-white rounded ${
                 loading
                   ? "bg-blue-400 cursor-not-allowed"
                   : "bg-blue-600 hover:bg-blue-700"
               }`}
             >
-              {loading ? "Updating..." : "Update"}
+              {loadingUpdate ? "Updating..." : "Update"}
             </button>
 
             {/* Message */}
