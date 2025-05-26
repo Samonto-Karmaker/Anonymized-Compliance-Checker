@@ -14,6 +14,7 @@ const Home = () => {
         </div>
       </div>
       {/* Task 3 */}
+      <hr className="my-2 border-gray-300" />
       <Task3Component />
     </>
   );
