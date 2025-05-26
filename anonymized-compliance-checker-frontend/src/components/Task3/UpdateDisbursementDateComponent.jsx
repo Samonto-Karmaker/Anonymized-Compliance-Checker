@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { useUpdateTask3Mutation } from "../services/contract_api";
+import { useUpdateTask3Mutation } from "../../services/contract_api";
 
-const Task3Component = () => {
+const UpdateDisbursementDateComponent = () => {
   const [id, setId] = useState("");
   const [disbursementDate, setDisbursementDate] = useState("");
   const [loading, setLoading] = useState(false);
@@ -33,10 +33,7 @@ const Task3Component = () => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto py-10 px-4">
-      <h1 className="text-2xl font-bold text-gray-800 mb-6">
-        Task 3
-      </h1>
+    <div>
       <p className="font-semibold text-gray-700 mb-2">
         Update disbursement date
       </p>
@@ -110,4 +107,4 @@ const Task3Component = () => {
   );
 };
 
-export default Task3Component;
+export default UpdateDisbursementDateComponent;
