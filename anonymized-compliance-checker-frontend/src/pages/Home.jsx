@@ -1,6 +1,7 @@
-import Task3Component from "../components/Task3Component";
 import Task1Component from "../components/Task1Component";
 import Task2Component from "../components/Task2Component";
+import CreateInventoryComponent from "../components/Task3/CreateInventoryComponent";
+import UpdateDisbursementDateComponent from "../components/Task3/UpdateDisbursementDateComponent";
 
 const Home = () => {
   return (
@@ -15,7 +16,11 @@ const Home = () => {
       </div>
       {/* Task 3 */}
       <hr className="my-2 border-gray-300" />
-      <Task3Component />
+      <div className="max-w-2xl mx-auto py-10 px-4">
+        <h1 className="text-2xl font-bold text-gray-800 mb-6">Task 3</h1>
+        <CreateInventoryComponent />
+        <UpdateDisbursementDateComponent />
+      </div>
     </>
   );
 };
