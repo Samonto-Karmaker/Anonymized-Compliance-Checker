@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useCreateTask3Mutation } from "../../services/contract_api";
 
 const CreateInventoryComponent = () => {
   const [productId, setProductId] = useState("");
@@ -8,12 +9,11 @@ const CreateInventoryComponent = () => {
   const [dateOfExpiry, setDateOfExpiry] = useState("");
   const [dateOfProcurement, setDateOfProcurement] = useState("");
   const [vendorName, setVendorName] = useState("");
-  const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState("idle");
   const [message, setMessage] = useState("");
+  const [createTask3, { isLoading: loadingCreate }] = useCreateTask3Mutation();
 
   const handleCreate = async () => {
-    setLoading(true);
     setMessage("");
     setStatus("idle");
 
@@ -29,16 +29,13 @@ const CreateInventoryComponent = () => {
       };
 
       console.log("Inventory Data:", data);
-
-      // Simulated success
-      setStatus("success");
-      setMessage("Inventory data updated successfully.");
+      const response = await createTask3(data).unwrap();
+      setStatus(response.message || "success");
+      setMessage("Inventory data Created successfully.");
     } catch (error) {
       setStatus("error");
-      setMessage(error.message || "Failed to update.");
+      setMessage(error.message || "Failed to Create.");
     }
-
-    setLoading(false);
   };
 
   return (
@@ -156,14 +153,14 @@ const CreateInventoryComponent = () => {
           <button
             type="button"
             onClick={handleCreate}
-            disabled={loading}
+            disabled={loadingCreate}
             className={`w-full px-3 py-2 text-sm text-white rounded ${
-              loading
+              loadingCreate
                 ? "bg-blue-400 cursor-not-allowed"
                 : "bg-blue-600 hover:bg-blue-700"
             }`}
           >
-            {loading ? "Creating..." : "Create New."}
+            {loadingCreate ? "Creating..." : "Create New."}
           </button>
 
           {/* Message Display */}
