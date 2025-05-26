@@ -12,13 +12,18 @@ export class Task3ContractService {
         process.env.SEPOLIA_RPC_URL
     )
 
-    private readonly contract = new ethers.Contract(
-        this.contractAddress,
-        this.abi,
+    private readonly wallet = new ethers.Wallet(
+        process.env.PRIVATE_KEY || "",
         this.provider
     )
 
+    private readonly contractWithSigner = new ethers.Contract(
+        this.contractAddress,
+        this.abi,
+        this.wallet
+    )
+
     getContract() {
-        return this.contract
+        return this.contractWithSigner
     }
 }
