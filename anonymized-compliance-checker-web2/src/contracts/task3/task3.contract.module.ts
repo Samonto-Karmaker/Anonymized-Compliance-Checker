@@ -5,4 +5,4 @@ import { Task3ContractService } from "./task3.contract.service"
     providers: [Task3ContractService],
     exports: [Task3ContractService],
 })
-export class Task2ContractModule {}
+export class Task3ContractModule {}
