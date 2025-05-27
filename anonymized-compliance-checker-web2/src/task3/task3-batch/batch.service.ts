@@ -1,8 +1,11 @@
 import { Injectable, NotFoundException } from "@nestjs/common"
 import { InjectRepository } from "@nestjs/typeorm"
+import { Task3ContractService } from "src/contracts/task3/task3.contract.service"
 import { BatchInfo } from "src/db/batchInfo.entity"
 import { Inventory } from "src/db/inventory.entity"
 import { In, Repository } from "typeorm"
+import { HashService } from "../task3-hash/hash.service"
+import { Contract } from "ethers"
 
 @Injectable()
 export class BatchService {
@@ -10,7 +13,9 @@ export class BatchService {
         @InjectRepository(BatchInfo)
         private readonly batchInfoRepository: Repository<BatchInfo>,
         @InjectRepository(Inventory)
-        private readonly inventoryRepository: Repository<Inventory>
+        private readonly inventoryRepository: Repository<Inventory>,
+        private readonly task3ContractService: Task3ContractService,
+        private readonly hashService: HashService
     ) {}
 
     async getBatchInfoByInventoryId(id: number): Promise<BatchInfo> {
@@ -87,7 +92,44 @@ export class BatchService {
             .join("||")
     }
 
-    // Helper functions
+    async generateInitialHash(
+        data: string,
+        type: "creation" | "update"
+    ): Promise<string> {
+        const contract = this.task3ContractService.getContract()
+        const prevHash = await this.getPreviousHash(contract, type)
+        const nextBatchId = await this.getNextBatchId(type)
+
+        return this.hashService.hashString(data, prevHash, nextBatchId)
+    }
+
+    // Helper methods
+    private async getPreviousHash(
+        contract: Contract,
+        type: "creation" | "update",
+        isLatest: boolean = true
+    ): Promise<string> {
+        if (!isLatest) {
+            // TODO: Implement logic to get a specific previous hash if needed
+            throw new Error("Previous hash retrieval not implemented")
+        }
+        if (type === "creation") {
+            return String(await contract.latestCreationHash())
+        }
+        return String(await contract.latestUpdateHash())
+    }
+
+    private async getNextBatchId(type: "creation" | "update"): Promise<number> {
+        const column = type === "creation" ? "creationBatchId" : "updateBatchId"
+
+        const result = await this.batchInfoRepository
+            .createQueryBuilder("batchInfo")
+            .select(`MAX(batchInfo.${column})`, "max")
+            .getRawOne<{ max: number }>()
+
+        return (result?.max ?? 0) + 1
+    }
+
     private async getInventoriesByBatchField(
         batchField: "creationBatchId" | "updateBatchId",
         id: number
