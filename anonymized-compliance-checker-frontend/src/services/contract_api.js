@@ -27,12 +27,30 @@ export const contract_api = createApi({
                 method: "GET"
             }),
             providesTags: ["Contract"]
-        })
+        }),
+        createTask3: builder.mutation({
+            query: (data) => ({
+                url: `/task3/create`,
+                method: "POST",
+                body:data
+            }),
+            providesTags: ["Contract"]
+        }),
+        updateTask3: builder.mutation({
+        query: ({ id, data }) => ({
+            url: `/task3/update-disbursement-date/${id}`,
+            method: "PATCH",
+            body: data
+        }),
+        invalidatesTags: ["Contract"]
+      })
     })
 })
 
 
 export const {
     useCheckTask1Mutation,
-    useCheckTask2Mutation
+    useCheckTask2Mutation,
+    useCreateTask3Mutation,
+    useUpdateTask3Mutation
 } = contract_api;
