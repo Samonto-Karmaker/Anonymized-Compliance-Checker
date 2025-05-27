@@ -60,6 +60,33 @@ export class BatchService {
             .getMany()
     }
 
+    prepareDataForCreationHash(inventories: Inventory[]): string {
+        return inventories
+            .map(inventory => {
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                const { dateOfDisbursement, ...rest } = inventory
+                return Object.values(rest)
+                    .map(value =>
+                        value instanceof Date
+                            ? value.toISOString()
+                            : value.toString()
+                    )
+                    .join("|")
+            })
+            .join("||")
+    }
+
+    prepareDataForUpdateHash(inventories: Inventory[]): string {
+        return inventories
+            .map(inventory => {
+                const { dateOfDisbursement } = inventory
+                return dateOfDisbursement
+                    ? dateOfDisbursement.toISOString()
+                    : "null"
+            })
+            .join("||")
+    }
+
     // Helper functions
     private async getInventoriesByBatchField(
         batchField: "creationBatchId" | "updateBatchId",
