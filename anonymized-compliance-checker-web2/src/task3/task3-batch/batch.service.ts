@@ -86,7 +86,7 @@ export class BatchService {
             .map(inventory => {
                 const { dateOfDisbursement } = inventory
                 return dateOfDisbursement
-                    ? dateOfDisbursement.toISOString()
+                    ? new Date(dateOfDisbursement).toISOString()
                     : "null"
             })
             .join("||")
