@@ -19,130 +19,7 @@ export class BatchService {
         private readonly hashService: HashService
     ) {}
 
-    async getBatchInfoByInventoryId(id: number): Promise<BatchInfo> {
-        const batchInfo = await this.batchInfoRepository.findOne({
-            where: { inventoryId: id },
-        })
-        if (!batchInfo) {
-            throw new NotFoundException(`BatchInfo with ID ${id} not found`)
-        }
-        return batchInfo
-    }
-
-    async getInventoryByCreationBatchId(id: number): Promise<Inventory[]> {
-        return this.getInventoriesByBatchField("creationBatchId", id)
-    }
-
-    async getInventoryByUpdateBatchId(id: number): Promise<Inventory[]> {
-        return this.getInventoriesByBatchField("updateBatchId", id)
-    }
-
-    async getUntrackedInventories(): Promise<Inventory[]> {
-        return this.inventoryRepository
-            .createQueryBuilder("inventory")
-            .leftJoin(
-                "batch_info",
-                "batchInfo",
-                "batchInfo.inventoryId = inventory.id"
-            )
-            .where("batchInfo.inventoryId IS NULL")
-            .orWhere("batchInfo.creationBatchId IS NULL")
-            .orderBy("inventory.id", "ASC")
-            .getMany()
-    }
-
-    async getInventoriesReadyForUpdateTracking(): Promise<Inventory[]> {
-        return this.inventoryRepository
-            .createQueryBuilder("inventory")
-            .innerJoin(
-                "batch_info",
-                "batchInfo",
-                "batchInfo.inventoryId = inventory.id"
-            )
-            .where("batchInfo.creationBatchId IS NOT NULL")
-            .andWhere("inventory.dateOfDisbursement IS NOT NULL")
-            .andWhere("batchInfo.updateBatchId IS NULL")
-            .orderBy("inventory.id", "ASC")
-            .getMany()
-    }
-
-    prepareDataForCreationHash(inventories: Inventory[]): string {
-        return inventories
-            .map(inventory => {
-                // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                const { dateOfDisbursement, ...rest } = inventory
-                return Object.values(rest)
-                    .map(value =>
-                        value instanceof Date
-                            ? value.toISOString()
-                            : value.toString()
-                    )
-                    .join("|")
-            })
-            .join("||")
-    }
-
-    prepareDataForUpdateHash(inventories: Inventory[]): string {
-        return inventories
-            .map(inventory => {
-                const { dateOfDisbursement } = inventory
-                return dateOfDisbursement
-                    ? new Date(dateOfDisbursement).toISOString()
-                    : "null"
-            })
-            .join("||")
-    }
-
-    async generateInitialHash(
-        data: string,
-        type: "creation" | "update"
-    ): Promise<{
-        contract: Contract
-        hash: string
-        batchId: number
-    }> {
-        const contract = this.task3ContractService.getContract()
-        const prevHash = await this.getPreviousHash(contract, type)
-        const nextBatchId = await this.getNextBatchId(type)
-
-        const hash = await this.hashService.hashString(
-            data,
-            prevHash,
-            nextBatchId
-        )
-        return { contract, hash, batchId: nextBatchId }
-    }
-
-    async generateCreationHashForVerification(
-        batchId: number
-    ): Promise<string> {
-        const inventories = await this.getInventoryByCreationBatchId(batchId)
-        const data = this.prepareDataForCreationHash(inventories)
-        const contract = this.task3ContractService.getContract()
-        const prevHash = await this.getPreviousHash(
-            contract,
-            "creation",
-            false,
-            batchId - 1
-        )
-        const hash = await this.hashService.hashString(data, prevHash, batchId)
-        return hash
-    }
-
-    async generateUpdateHashForVerification(batchId: number): Promise<string> {
-        const inventories = await this.getInventoryByUpdateBatchId(batchId)
-        const data = this.prepareDataForUpdateHash(inventories)
-        const contract = this.task3ContractService.getContract()
-        const prevHash = await this.getPreviousHash(
-            contract,
-            "update",
-            false,
-            batchId - 1
-        )
-        const hash = await this.hashService.hashString(data, prevHash, batchId)
-        return hash
-    }
-
+    // ==== Verification Methods ====
     async verifyCreationHashByInventoryId(
         inventoryId: number
     ): Promise<boolean> {
@@ -192,62 +69,9 @@ export class BatchService {
             await this.getInventoriesReadyForUpdateTracking()
         ).length
 
-        const totalCreationBatches = await this.batchInfoRepository
-            .createQueryBuilder("batchInfo")
-            .select("COUNT(DISTINCT batchInfo.creationBatchId)", "count")
-            .getRawOne<{ count: number }>()
-        const totalUpdateBatches = await this.batchInfoRepository
-            .createQueryBuilder("batchInfo")
-            .select("COUNT(DISTINCT batchInfo.updateBatchId)", "count")
-            .getRawOne<{ count: number }>()
+        const creationBatchesVerified = await this.verifyCreationBatches()
+        const updateBatchesVerified = await this.verifyUpdateBatches()
 
-        let creationBatchesVerified = true
-        let updateBatchesVerified = true
-        if (totalCreationBatches?.count) {
-            for (let i = 1; i <= totalCreationBatches.count; i++) {
-                try {
-                    const hash =
-                        await this.generateCreationHashForVerification(i)
-                    const storedHash = (
-                        await this.hashService.getCreationHashByInternalId(i)
-                    ).hash
-                    if (hash !== storedHash) {
-                        console.error(
-                            `Creation batch ${i} hash mismatch: expected ${storedHash}, got ${hash}`
-                        )
-                        creationBatchesVerified = false
-                        break
-                    }
-                } catch (error) {
-                    console.error(
-                        `Creation batch ${i} verification failed`,
-                        error
-                    )
-                }
-            }
-        }
-        if (totalUpdateBatches?.count) {
-            for (let i = 1; i <= totalUpdateBatches.count; i++) {
-                try {
-                    const hash = await this.generateUpdateHashForVerification(i)
-                    const storedHash = (
-                        await this.hashService.getUpdateHashByInternalId(i)
-                    ).hash
-                    if (hash !== storedHash) {
-                        console.error(
-                            `Update batch ${i} hash mismatch: expected ${storedHash}, got ${hash}`
-                        )
-                        updateBatchesVerified = false
-                        break
-                    }
-                } catch (error) {
-                    console.error(
-                        `Update batch ${i} verification failed`,
-                        error
-                    )
-                }
-            }
-        }
         return new Task3Response(
             untrackedInventories,
             inventoriesReadyForUpdate,
@@ -256,6 +80,7 @@ export class BatchService {
         )
     }
 
+    // ==== Send Batch to On-Chain Methods ====
     async sendCreationBatch(): Promise<void> {
         const untracked = await this.getUntrackedInventories()
         const minSize = Number(process.env.MIN_BATCH_SIZE) || 5
@@ -347,7 +172,192 @@ export class BatchService {
         }
     }
 
-    // Helper methods
+    // ==== Private Helper Methods ====
+    private async getBatchInfoByInventoryId(id: number): Promise<BatchInfo> {
+        const batchInfo = await this.batchInfoRepository.findOne({
+            where: { inventoryId: id },
+        })
+        if (!batchInfo) {
+            throw new NotFoundException(`BatchInfo with ID ${id} not found`)
+        }
+        return batchInfo
+    }
+
+    private async getInventoryByCreationBatchId(
+        id: number
+    ): Promise<Inventory[]> {
+        return this.getInventoriesByBatchField("creationBatchId", id)
+    }
+
+    private async getInventoryByUpdateBatchId(
+        id: number
+    ): Promise<Inventory[]> {
+        return this.getInventoriesByBatchField("updateBatchId", id)
+    }
+
+    private async getUntrackedInventories(): Promise<Inventory[]> {
+        return this.inventoryRepository
+            .createQueryBuilder("inventory")
+            .leftJoin(
+                "batch_info",
+                "batchInfo",
+                "batchInfo.inventoryId = inventory.id"
+            )
+            .where("batchInfo.inventoryId IS NULL")
+            .orWhere("batchInfo.creationBatchId IS NULL")
+            .orderBy("inventory.id", "ASC")
+            .getMany()
+    }
+
+    private async getInventoriesReadyForUpdateTracking(): Promise<Inventory[]> {
+        return this.inventoryRepository
+            .createQueryBuilder("inventory")
+            .innerJoin(
+                "batch_info",
+                "batchInfo",
+                "batchInfo.inventoryId = inventory.id"
+            )
+            .where("batchInfo.creationBatchId IS NOT NULL")
+            .andWhere("inventory.dateOfDisbursement IS NOT NULL")
+            .andWhere("batchInfo.updateBatchId IS NULL")
+            .orderBy("inventory.id", "ASC")
+            .getMany()
+    }
+
+    private prepareDataForCreationHash(inventories: Inventory[]): string {
+        return inventories
+            .map(inventory => {
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                const { dateOfDisbursement, ...rest } = inventory
+                return Object.values(rest)
+                    .map(value =>
+                        value instanceof Date
+                            ? value.toISOString()
+                            : value.toString()
+                    )
+                    .join("|")
+            })
+            .join("||")
+    }
+
+    private prepareDataForUpdateHash(inventories: Inventory[]): string {
+        return inventories
+            .map(inventory => {
+                const { dateOfDisbursement } = inventory
+                return dateOfDisbursement
+                    ? new Date(dateOfDisbursement).toISOString()
+                    : "null"
+            })
+            .join("||")
+    }
+
+    private async generateInitialHash(
+        data: string,
+        type: "creation" | "update"
+    ): Promise<{
+        contract: Contract
+        hash: string
+        batchId: number
+    }> {
+        const contract = this.task3ContractService.getContract()
+        const prevHash = await this.getPreviousHash(contract, type)
+        const nextBatchId = await this.getNextBatchId(type)
+
+        const hash = await this.hashService.hashString(
+            data,
+            prevHash,
+            nextBatchId
+        )
+        return { contract, hash, batchId: nextBatchId }
+    }
+
+    private async generateCreationHashForVerification(
+        batchId: number
+    ): Promise<string> {
+        const inventories = await this.getInventoryByCreationBatchId(batchId)
+        const data = this.prepareDataForCreationHash(inventories)
+        const contract = this.task3ContractService.getContract()
+        const prevHash = await this.getPreviousHash(
+            contract,
+            "creation",
+            false,
+            batchId - 1
+        )
+        const hash = await this.hashService.hashString(data, prevHash, batchId)
+        return hash
+    }
+
+    private async generateUpdateHashForVerification(
+        batchId: number
+    ): Promise<string> {
+        const inventories = await this.getInventoryByUpdateBatchId(batchId)
+        const data = this.prepareDataForUpdateHash(inventories)
+        const contract = this.task3ContractService.getContract()
+        const prevHash = await this.getPreviousHash(
+            contract,
+            "update",
+            false,
+            batchId - 1
+        )
+        const hash = await this.hashService.hashString(data, prevHash, batchId)
+        return hash
+    }
+
+    private async verifyCreationBatches(): Promise<boolean> {
+        const totalCreationBatches = await this.batchInfoRepository
+            .createQueryBuilder("batchInfo")
+            .select("COUNT(DISTINCT batchInfo.creationBatchId)", "count")
+            .getRawOne<{ count: number }>()
+        if (!totalCreationBatches?.count) {
+            console.log("No creation batches found for verification.")
+            return true
+        }
+        for (let i = 1; i <= totalCreationBatches.count; i++) {
+            try {
+                const hash = await this.generateCreationHashForVerification(i)
+                const storedHash = (
+                    await this.hashService.getCreationHashByInternalId(i)
+                ).hash
+                if (hash !== storedHash) {
+                    console.error(
+                        `Creation batch ${i} hash mismatch: expected ${storedHash}, got ${hash}`
+                    )
+                    return false
+                }
+            } catch (error) {
+                console.error(`Creation batch ${i} verification failed`, error)
+            }
+        }
+        return true
+    }
+    private async verifyUpdateBatches(): Promise<boolean> {
+        const totalUpdateBatches = await this.batchInfoRepository
+            .createQueryBuilder("batchInfo")
+            .select("COUNT(DISTINCT batchInfo.updateBatchId)", "count")
+            .getRawOne<{ count: number }>()
+        if (!totalUpdateBatches?.count) {
+            console.log("No update batches found for verification.")
+            return true
+        }
+        for (let i = 1; i <= totalUpdateBatches.count; i++) {
+            try {
+                const hash = await this.generateUpdateHashForVerification(i)
+                const storedHash = (
+                    await this.hashService.getUpdateHashByInternalId(i)
+                ).hash
+                if (hash !== storedHash) {
+                    console.error(
+                        `Update batch ${i} hash mismatch: expected ${storedHash}, got ${hash}`
+                    )
+                    return false
+                }
+            } catch (error) {
+                console.error(`Update batch ${i} verification failed`, error)
+            }
+        }
+        return true
+    }
+
     private async getPreviousHash(
         contract: Contract,
         type: "creation" | "update",
