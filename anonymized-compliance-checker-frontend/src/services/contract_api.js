@@ -46,7 +46,7 @@ export const contract_api = createApi({
 
       getHashByCreationId: builder.query({
          query: (id) => ({
-            url: `/hash/creation/${id}`,
+            url: `/task3/hash/creation/${id}`,
             method: "GET",
         }),
         invalidatesTags: ["Contract"]
@@ -54,7 +54,7 @@ export const contract_api = createApi({
 
       getHashByUpdateId:builder.query({
          query: (id) => ({
-            url: `/hash/update/${id}`,
+            url: `/task3/hash/update/${id}`,
             method: "GET",
         }),
         invalidatesTags: ["Contract"]
@@ -62,7 +62,7 @@ export const contract_api = createApi({
 
       verifyAllBatches: builder.query({
          query: () => ({
-            url: `/batch/verify/all`,
+            url: `/task3/batch/verify/all`,
             method: "GET",
         }),
         invalidatesTags: ["Contract"]
