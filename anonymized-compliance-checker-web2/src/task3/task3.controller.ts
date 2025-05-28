@@ -6,7 +6,6 @@ import {
     Param,
     Patch,
     Post,
-    Query
 } from "@nestjs/common"
 import { InventoryService } from "./task3-inventory/inventory.service"
 import { CreateInventoryDto } from "src/dto/create-inventory"
@@ -16,7 +15,7 @@ import { HashService } from "./task3-hash/hash.service"
 export class Task3Controller {
     constructor(
         private readonly task3Service: InventoryService,
-        private readonly task3HashService:HashService
+        private readonly task3HashService: HashService
     ) {}
 
     @Get("all")
@@ -43,13 +42,17 @@ export class Task3Controller {
     }
 
     @Get("hash/creation/:internalId")
-    async getHashByCreationId(@Param("internalId") internalId:string){
-        const parsedInternalId=parseInt(internalId,10)
-        return await this.task3HashService.getCreationHashByInternalId(parsedInternalId);
+    async getHashByCreationId(@Param("internalId") internalId: string) {
+        const parsedInternalId = parseInt(internalId, 10)
+        return await this.task3HashService.getCreationHashByInternalId(
+            parsedInternalId
+        )
     }
     @Get("hash/update/:internalId")
-    async getHashByUpdateId(@Param("internalId") internalId:string){
-        const parsedInternalId=parseInt(internalId,10)
-        return await this.task3HashService.getUpdateHashByInternalId(parsedInternalId);
+    async getHashByUpdateId(@Param("internalId") internalId: string) {
+        const parsedInternalId = parseInt(internalId, 10)
+        return await this.task3HashService.getUpdateHashByInternalId(
+            parsedInternalId
+        )
     }
 }
