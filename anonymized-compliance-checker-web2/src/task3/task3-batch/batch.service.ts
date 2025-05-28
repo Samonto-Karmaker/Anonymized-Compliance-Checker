@@ -6,6 +6,7 @@ import { Inventory } from "src/db/inventory.entity"
 import { In, Repository } from "typeorm"
 import { HashService } from "../task3-hash/hash.service"
 import { Contract, ContractTransactionResponse } from "ethers"
+import { Task3Response } from "src/dto/task3-response"
 
 @Injectable()
 export class BatchService {
@@ -181,6 +182,77 @@ export class BatchService {
                     batchInfo.updateBatchId
                 )
             ).hash
+        )
+    }
+
+    async verifyAll(): Promise<Task3Response> {
+        const untrackedInventories = (await this.getUntrackedInventories())
+            .length
+        const inventoriesReadyForUpdate = (
+            await this.getInventoriesReadyForUpdateTracking()
+        ).length
+
+        const totalCreationBatches = await this.batchInfoRepository
+            .createQueryBuilder("batchInfo")
+            .select("COUNT(DISTINCT batchInfo.creationBatchId)", "count")
+            .getRawOne<{ count: number }>()
+        const totalUpdateBatches = await this.batchInfoRepository
+            .createQueryBuilder("batchInfo")
+            .select("COUNT(DISTINCT batchInfo.updateBatchId)", "count")
+            .getRawOne<{ count: number }>()
+
+        let creationBatchesVerified = true
+        let updateBatchesVerified = true
+        if (totalCreationBatches?.count) {
+            for (let i = 1; i <= totalCreationBatches.count; i++) {
+                try {
+                    const hash =
+                        await this.generateCreationHashForVerification(i)
+                    const storedHash = (
+                        await this.hashService.getCreationHashByInternalId(i)
+                    ).hash
+                    if (hash !== storedHash) {
+                        console.error(
+                            `Creation batch ${i} hash mismatch: expected ${storedHash}, got ${hash}`
+                        )
+                        creationBatchesVerified = false
+                        break
+                    }
+                } catch (error) {
+                    console.error(
+                        `Creation batch ${i} verification failed`,
+                        error
+                    )
+                }
+            }
+        }
+        if (totalUpdateBatches?.count) {
+            for (let i = 1; i <= totalUpdateBatches.count; i++) {
+                try {
+                    const hash = await this.generateUpdateHashForVerification(i)
+                    const storedHash = (
+                        await this.hashService.getUpdateHashByInternalId(i)
+                    ).hash
+                    if (hash !== storedHash) {
+                        console.error(
+                            `Update batch ${i} hash mismatch: expected ${storedHash}, got ${hash}`
+                        )
+                        updateBatchesVerified = false
+                        break
+                    }
+                } catch (error) {
+                    console.error(
+                        `Update batch ${i} verification failed`,
+                        error
+                    )
+                }
+            }
+        }
+        return new Task3Response(
+            untrackedInventories,
+            inventoriesReadyForUpdate,
+            creationBatchesVerified,
+            updateBatchesVerified
         )
     }
 
