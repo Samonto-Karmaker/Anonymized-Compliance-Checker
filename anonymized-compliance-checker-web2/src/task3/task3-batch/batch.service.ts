@@ -113,59 +113,75 @@ export class BatchService {
     }
 
     async generateCreationHashForVerification(
-        inventoryId: number
+        batchId: number
     ): Promise<string> {
-        const batchInfo = await this.getBatchInfoByInventoryId(inventoryId)
-        if (!batchInfo.creationBatchId) {
-            throw new NotFoundException(
-                `No creation batch found for inventory ID ${inventoryId}`
-            )
-        }
-        const inventories = await this.getInventoryByCreationBatchId(
-            batchInfo.creationBatchId
-        )
+        const inventories = await this.getInventoryByCreationBatchId(batchId)
         const data = this.prepareDataForCreationHash(inventories)
         const contract = this.task3ContractService.getContract()
         const prevHash = await this.getPreviousHash(
             contract,
             "creation",
             false,
-            batchInfo.creationBatchId - 1
+            batchId - 1
         )
-        const hash = await this.hashService.hashString(
-            data,
-            prevHash,
-            batchInfo.creationBatchId
-        )
+        const hash = await this.hashService.hashString(data, prevHash, batchId)
         return hash
     }
 
-    async generateUpdateHashForVerification(
-        inventoryId: number
-    ): Promise<string> {
-        const batchInfo = await this.getBatchInfoByInventoryId(inventoryId)
-        if (!batchInfo.updateBatchId) {
-            throw new NotFoundException(
-                `No update batch found for inventory ID ${inventoryId}`
-            )
-        }
-        const inventories = await this.getInventoryByUpdateBatchId(
-            batchInfo.updateBatchId
-        )
+    async generateUpdateHashForVerification(batchId: number): Promise<string> {
+        const inventories = await this.getInventoryByUpdateBatchId(batchId)
         const data = this.prepareDataForUpdateHash(inventories)
         const contract = this.task3ContractService.getContract()
         const prevHash = await this.getPreviousHash(
             contract,
             "update",
             false,
-            batchInfo.updateBatchId - 1
+            batchId - 1
         )
-        const hash = await this.hashService.hashString(
-            data,
-            prevHash,
+        const hash = await this.hashService.hashString(data, prevHash, batchId)
+        return hash
+    }
+
+    async verifyCreationHashByInventoryId(
+        inventoryId: number
+    ): Promise<boolean> {
+        const batchInfo = await this.getBatchInfoByInventoryId(inventoryId)
+        if (!batchInfo.creationBatchId) {
+            throw new NotFoundException(
+                `No creation batch found for inventory ID ${inventoryId}`
+            )
+        }
+        const hash = await this.generateCreationHashForVerification(
+            batchInfo.creationBatchId
+        )
+        return (
+            hash ===
+            (
+                await this.hashService.getCreationHashByInternalId(
+                    batchInfo.creationBatchId
+                )
+            ).hash
+        )
+    }
+
+    async verifyUpdateHashByInventoryId(inventoryId: number): Promise<boolean> {
+        const batchInfo = await this.getBatchInfoByInventoryId(inventoryId)
+        if (!batchInfo.updateBatchId) {
+            throw new NotFoundException(
+                `No update batch found for inventory ID ${inventoryId}`
+            )
+        }
+        const hash = await this.generateUpdateHashForVerification(
             batchInfo.updateBatchId
         )
-        return hash
+        return (
+            hash ===
+            (
+                await this.hashService.getUpdateHashByInternalId(
+                    batchInfo.updateBatchId
+                )
+            ).hash
+        )
     }
 
     async sendCreationBatch(): Promise<void> {
