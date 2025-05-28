@@ -192,62 +192,9 @@ export class BatchService {
             await this.getInventoriesReadyForUpdateTracking()
         ).length
 
-        const totalCreationBatches = await this.batchInfoRepository
-            .createQueryBuilder("batchInfo")
-            .select("COUNT(DISTINCT batchInfo.creationBatchId)", "count")
-            .getRawOne<{ count: number }>()
-        const totalUpdateBatches = await this.batchInfoRepository
-            .createQueryBuilder("batchInfo")
-            .select("COUNT(DISTINCT batchInfo.updateBatchId)", "count")
-            .getRawOne<{ count: number }>()
+        const creationBatchesVerified = await this.verifyCreationBatches()
+        const updateBatchesVerified = await this.verifyUpdateBatches()
 
-        let creationBatchesVerified = true
-        let updateBatchesVerified = true
-        if (totalCreationBatches?.count) {
-            for (let i = 1; i <= totalCreationBatches.count; i++) {
-                try {
-                    const hash =
-                        await this.generateCreationHashForVerification(i)
-                    const storedHash = (
-                        await this.hashService.getCreationHashByInternalId(i)
-                    ).hash
-                    if (hash !== storedHash) {
-                        console.error(
-                            `Creation batch ${i} hash mismatch: expected ${storedHash}, got ${hash}`
-                        )
-                        creationBatchesVerified = false
-                        break
-                    }
-                } catch (error) {
-                    console.error(
-                        `Creation batch ${i} verification failed`,
-                        error
-                    )
-                }
-            }
-        }
-        if (totalUpdateBatches?.count) {
-            for (let i = 1; i <= totalUpdateBatches.count; i++) {
-                try {
-                    const hash = await this.generateUpdateHashForVerification(i)
-                    const storedHash = (
-                        await this.hashService.getUpdateHashByInternalId(i)
-                    ).hash
-                    if (hash !== storedHash) {
-                        console.error(
-                            `Update batch ${i} hash mismatch: expected ${storedHash}, got ${hash}`
-                        )
-                        updateBatchesVerified = false
-                        break
-                    }
-                } catch (error) {
-                    console.error(
-                        `Update batch ${i} verification failed`,
-                        error
-                    )
-                }
-            }
-        }
         return new Task3Response(
             untrackedInventories,
             inventoriesReadyForUpdate,
@@ -348,6 +295,61 @@ export class BatchService {
     }
 
     // Helper methods
+    private async verifyCreationBatches(): Promise<boolean> {
+        const totalCreationBatches = await this.batchInfoRepository
+            .createQueryBuilder("batchInfo")
+            .select("COUNT(DISTINCT batchInfo.creationBatchId)", "count")
+            .getRawOne<{ count: number }>()
+        if (!totalCreationBatches?.count) {
+            console.log("No creation batches found for verification.")
+            return true
+        }
+        for (let i = 1; i <= totalCreationBatches.count; i++) {
+            try {
+                const hash = await this.generateCreationHashForVerification(i)
+                const storedHash = (
+                    await this.hashService.getCreationHashByInternalId(i)
+                ).hash
+                if (hash !== storedHash) {
+                    console.error(
+                        `Creation batch ${i} hash mismatch: expected ${storedHash}, got ${hash}`
+                    )
+                    return false
+                }
+            } catch (error) {
+                console.error(`Creation batch ${i} verification failed`, error)
+            }
+        }
+        return true
+    }
+    private async verifyUpdateBatches(): Promise<boolean> {
+        const totalUpdateBatches = await this.batchInfoRepository
+            .createQueryBuilder("batchInfo")
+            .select("COUNT(DISTINCT batchInfo.updateBatchId)", "count")
+            .getRawOne<{ count: number }>()
+        if (!totalUpdateBatches?.count) {
+            console.log("No update batches found for verification.")
+            return true
+        }
+        for (let i = 1; i <= totalUpdateBatches.count; i++) {
+            try {
+                const hash = await this.generateUpdateHashForVerification(i)
+                const storedHash = (
+                    await this.hashService.getUpdateHashByInternalId(i)
+                ).hash
+                if (hash !== storedHash) {
+                    console.error(
+                        `Update batch ${i} hash mismatch: expected ${storedHash}, got ${hash}`
+                    )
+                    return false
+                }
+            } catch (error) {
+                console.error(`Update batch ${i} verification failed`, error)
+            }
+        }
+        return true
+    }
+
     private async getPreviousHash(
         contract: Contract,
         type: "creation" | "update",
