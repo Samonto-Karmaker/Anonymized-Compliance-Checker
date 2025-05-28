@@ -5,8 +5,7 @@ import { GraphQLClient, gql } from "graphql-request"
 
 @Injectable()
 export class HashService {
-    private readonly subGraphURL =
-        "https://api.studio.thegraph.com/query/112505/prac-2/version/latest"
+    private readonly subGraphURL =process.env.SUBGRAPH_URL||"";
     private readonly client: GraphQLClient
     constructor() {
         this.client = new GraphQLClient(this.subGraphURL)
