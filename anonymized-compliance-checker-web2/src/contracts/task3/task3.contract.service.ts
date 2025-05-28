@@ -1,7 +1,6 @@
 import { Injectable } from "@nestjs/common"
 import { ethers } from "ethers"
 import { abi } from "./task3.abi"
-
 @Injectable()
 export class Task3ContractService {
     private readonly contractAddress = process.env.CONTRACT_ADDRESS_TASK3 || ""
