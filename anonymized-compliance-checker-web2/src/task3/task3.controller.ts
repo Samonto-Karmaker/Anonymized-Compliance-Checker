@@ -6,13 +6,18 @@ import {
     Param,
     Patch,
     Post,
+    Query
 } from "@nestjs/common"
 import { InventoryService } from "./task3-inventory/inventory.service"
 import { CreateInventoryDto } from "src/dto/create-inventory"
+import { HashService } from "./task3-hash/hash.service"
 
 @Controller("task3")
 export class Task3Controller {
-    constructor(private readonly task3Service: InventoryService) {}
+    constructor(
+        private readonly task3Service: InventoryService,
+        private readonly task3HashService:HashService
+    ) {}
 
     @Get("all")
     getInventory() {
@@ -35,5 +40,16 @@ export class Task3Controller {
             inventoryId,
             new Date(date)
         )
+    }
+
+    @Get("hash/creation/:internalId")
+    async getHashByCreationId(@Param("internalId") internalId:string){
+        const parsedInternalId=parseInt(internalId,10)
+        return await this.task3HashService.getCreationHashByInternalId(parsedInternalId);
+    }
+    @Get("hash/update/:internalId")
+    async getHashByUpdateId(@Param("internalId") internalId:string){
+        const parsedInternalId=parseInt(internalId,10)
+        return await this.task3HashService.getUpdateHashByInternalId(parsedInternalId);
     }
 }
