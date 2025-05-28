@@ -33,7 +33,7 @@ const UpdateDisbursementDateComponent = () => {
   };
 
   return (
-    <div>
+    <div className="mb-7">
       <p className="font-semibold text-gray-700 mb-2">
         Update disbursement date
       </p>
