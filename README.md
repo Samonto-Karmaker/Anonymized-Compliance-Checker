@@ -1,6 +1,6 @@
 # Anonymized Compliance Checker - Contribution Guide
 
-Welcome to the **Anonymized Compliance Checker** project This guide outlines how to contribute effectively to ensure a professional, maintainable, and collaborative codebase.
+Welcome to the **Anonymized Compliance Checker** project! This guide outlines how to contribute effectively to ensure a professional, maintainable, and collaborative codebase.
 
 ---
 

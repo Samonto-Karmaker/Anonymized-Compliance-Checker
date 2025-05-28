@@ -6,6 +6,7 @@ import { Inventory } from "src/db/inventory.entity"
 import { In, Repository } from "typeorm"
 import { HashService } from "../task3-hash/hash.service"
 import { Contract, ContractTransactionResponse } from "ethers"
+import { Task3Response } from "src/dto/task3-response"
 
 @Injectable()
 export class BatchService {
@@ -112,6 +113,149 @@ export class BatchService {
         return { contract, hash, batchId: nextBatchId }
     }
 
+    async generateCreationHashForVerification(
+        batchId: number
+    ): Promise<string> {
+        const inventories = await this.getInventoryByCreationBatchId(batchId)
+        const data = this.prepareDataForCreationHash(inventories)
+        const contract = this.task3ContractService.getContract()
+        const prevHash = await this.getPreviousHash(
+            contract,
+            "creation",
+            false,
+            batchId - 1
+        )
+        const hash = await this.hashService.hashString(data, prevHash, batchId)
+        return hash
+    }
+
+    async generateUpdateHashForVerification(batchId: number): Promise<string> {
+        const inventories = await this.getInventoryByUpdateBatchId(batchId)
+        const data = this.prepareDataForUpdateHash(inventories)
+        const contract = this.task3ContractService.getContract()
+        const prevHash = await this.getPreviousHash(
+            contract,
+            "update",
+            false,
+            batchId - 1
+        )
+        const hash = await this.hashService.hashString(data, prevHash, batchId)
+        return hash
+    }
+
+    async verifyCreationHashByInventoryId(
+        inventoryId: number
+    ): Promise<boolean> {
+        const batchInfo = await this.getBatchInfoByInventoryId(inventoryId)
+        if (!batchInfo.creationBatchId) {
+            throw new NotFoundException(
+                `No creation batch found for inventory ID ${inventoryId}`
+            )
+        }
+        const hash = await this.generateCreationHashForVerification(
+            batchInfo.creationBatchId
+        )
+        return (
+            hash ===
+            (
+                await this.hashService.getCreationHashByInternalId(
+                    batchInfo.creationBatchId
+                )
+            ).hash
+        )
+    }
+
+    async verifyUpdateHashByInventoryId(inventoryId: number): Promise<boolean> {
+        const batchInfo = await this.getBatchInfoByInventoryId(inventoryId)
+        if (!batchInfo.updateBatchId) {
+            throw new NotFoundException(
+                `No update batch found for inventory ID ${inventoryId}`
+            )
+        }
+        const hash = await this.generateUpdateHashForVerification(
+            batchInfo.updateBatchId
+        )
+        return (
+            hash ===
+            (
+                await this.hashService.getUpdateHashByInternalId(
+                    batchInfo.updateBatchId
+                )
+            ).hash
+        )
+    }
+
+    async verifyAll(): Promise<Task3Response> {
+        const untrackedInventories = (await this.getUntrackedInventories())
+            .length
+        const inventoriesReadyForUpdate = (
+            await this.getInventoriesReadyForUpdateTracking()
+        ).length
+
+        const totalCreationBatches = await this.batchInfoRepository
+            .createQueryBuilder("batchInfo")
+            .select("COUNT(DISTINCT batchInfo.creationBatchId)", "count")
+            .getRawOne<{ count: number }>()
+        const totalUpdateBatches = await this.batchInfoRepository
+            .createQueryBuilder("batchInfo")
+            .select("COUNT(DISTINCT batchInfo.updateBatchId)", "count")
+            .getRawOne<{ count: number }>()
+
+        let creationBatchesVerified = true
+        let updateBatchesVerified = true
+        if (totalCreationBatches?.count) {
+            for (let i = 1; i <= totalCreationBatches.count; i++) {
+                try {
+                    const hash =
+                        await this.generateCreationHashForVerification(i)
+                    const storedHash = (
+                        await this.hashService.getCreationHashByInternalId(i)
+                    ).hash
+                    if (hash !== storedHash) {
+                        console.error(
+                            `Creation batch ${i} hash mismatch: expected ${storedHash}, got ${hash}`
+                        )
+                        creationBatchesVerified = false
+                        break
+                    }
+                } catch (error) {
+                    console.error(
+                        `Creation batch ${i} verification failed`,
+                        error
+                    )
+                }
+            }
+        }
+        if (totalUpdateBatches?.count) {
+            for (let i = 1; i <= totalUpdateBatches.count; i++) {
+                try {
+                    const hash = await this.generateUpdateHashForVerification(i)
+                    const storedHash = (
+                        await this.hashService.getUpdateHashByInternalId(i)
+                    ).hash
+                    if (hash !== storedHash) {
+                        console.error(
+                            `Update batch ${i} hash mismatch: expected ${storedHash}, got ${hash}`
+                        )
+                        updateBatchesVerified = false
+                        break
+                    }
+                } catch (error) {
+                    console.error(
+                        `Update batch ${i} verification failed`,
+                        error
+                    )
+                }
+            }
+        }
+        return new Task3Response(
+            untrackedInventories,
+            inventoriesReadyForUpdate,
+            creationBatchesVerified,
+            updateBatchesVerified
+        )
+    }
+
     async sendCreationBatch(): Promise<void> {
         const untracked = await this.getUntrackedInventories()
         const minSize = Number(process.env.MIN_BATCH_SIZE) || 5
@@ -207,11 +351,27 @@ export class BatchService {
     private async getPreviousHash(
         contract: Contract,
         type: "creation" | "update",
-        isLatest: boolean = true
+        isLatest: boolean = true,
+        id?: number
     ): Promise<string> {
         if (!isLatest) {
-            // TODO: Implement logic to get a specific previous hash if needed
-            throw new Error("Previous hash retrieval not implemented")
+            const batchId = id ?? (await this.getNextBatchId(type)) - 1
+            if (batchId < 1) {
+                return ""
+            }
+            if (type === "creation") {
+                return (
+                    (
+                        await this.hashService.getCreationHashByInternalId(
+                            batchId
+                        )
+                    ).hash || ""
+                )
+            }
+            return (
+                (await this.hashService.getUpdateHashByInternalId(batchId))
+                    .hash || ""
+            )
         }
         if (type === "creation") {
             return String(await contract.latestCreationHash())
