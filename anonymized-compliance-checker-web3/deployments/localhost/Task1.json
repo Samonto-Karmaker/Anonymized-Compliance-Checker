@@ -1,0 +1,141 @@
+{
+  "address": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+  "abi": [
+    {
+      "inputs": [],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32[]",
+          "name": "fieldHashes",
+          "type": "bytes32[]"
+        }
+      ],
+      "name": "isCompliant",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "owner",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "transactionHash": "0x0e0557dd22a3f575ec898e403aaae7a30e6ff184b65cd6eb929f89de2e1fa406",
+  "receipt": {
+    "to": null,
+    "from": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+    "contractAddress": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+    "transactionIndex": 0,
+    "gasUsed": "795422",
+    "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "blockHash": "0x08ff39c515bafba576ccd354baa993f561826fd8b24c5b1e2f72a138bea8501e",
+    "transactionHash": "0x0e0557dd22a3f575ec898e403aaae7a30e6ff184b65cd6eb929f89de2e1fa406",
+    "logs": [],
+    "blockNumber": 1,
+    "cumulativeGasUsed": "795422",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [],
+  "numDeployments": 1,
+  "solcInputHash": "e1154da6fa117a3448c65d7305c1bd41",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.28+commit.7893614a\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[{\"internalType\":\"bytes32[]\",\"name\":\"fieldHashes\",\"type\":\"bytes32[]\"}],\"name\":\"isCompliant\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"author\":\"Omitul Islam\",\"details\":\"Uses a mapping of hashed field names to determine non-compliance\",\"kind\":\"dev\",\"methods\":{\"isCompliant(bytes32[])\":{\"params\":{\"fieldHashes\":\"An array of hashed field names to check for GDPR compliance\"},\"returns\":{\"_0\":\"Returns false if any field is blacklisted, true otherwise!\"}}},\"title\":\"Task 1 GDPR Compliance Validator\",\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{\"constructor\":{\"notice\":\"Initializes the contract, sets the owner, and populates the blacklist with hardcoded hashes\"},\"isCompliant(bytes32[])\":{\"notice\":\"Checks if any of the provided field hashes are blacklisted\"},\"owner()\":{\"notice\":\"The address of the contract deployer (owner)\"}},\"notice\":\"Validates that provided hashed field names are not in the predefined blacklist\",\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/task1.sol\":\"Task1\"},\"evmVersion\":\"paris\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"contracts/task1.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\r\\npragma solidity ^0.8.0;\\r\\n\\r\\n/// @title Task 1 GDPR Compliance Validator\\r\\n/// @author Omitul Islam\\r\\n/// @notice Validates that provided hashed field names are not in the predefined blacklist\\r\\n/// @dev Uses a mapping of hashed field names to determine non-compliance\\r\\n\\r\\ncontract Task1 {\\r\\n    /// @notice Mapping to store blacklisted (non-compliant) field hashes\\r\\n    mapping(bytes32 => bool) private blacklistedFields;\\r\\n\\r\\n    /// @notice The address of the contract deployer (owner)\\r\\n    address public owner;\\r\\n\\r\\n    /// @notice Initializes the contract, sets the owner, and populates the blacklist with hardcoded hashes\\r\\n    constructor() {\\r\\n        owner = msg.sender;\\r\\n        \\r\\n        //https://coding.tools/sha256\\r\\n        \\r\\n        blacklistedFields[0x129CE50DD90BF244858763D3F10932A9F6D8A521AD4F2C946574E9A566E04054] = true; // race\\r\\n        blacklistedFields[0x78D733C8223CAE0A13CD2CEB2C81F589328808C6BF4FF1F99C5DBA85CB1969AD] = true; // ethnicity\\r\\n        blacklistedFields[0x14B40940148BC14C3643FF50290381B671590987F20D23D81296329FDFBA2F70] = true; // ethnic_origin\\r\\n        blacklistedFields[0x5D3575D1A0AB5B2F5EE09A5E4FBAE19BCAA9F9343659AA29603B2CBC9AB5D99D] = true; // political_view\\r\\n        blacklistedFields[0x4E50D0E7D9A419FAD99F94C8E1DB70A6197328F9B00DEBAACC8059C01585CA77] = true; // party_affiliation\\r\\n        blacklistedFields[0x139D14B61CAE91C759A05E3F8ECE2128CDC1B43D95FD48B9038000D9C1C9C178] = true; // religion\\r\\n        blacklistedFields[0x2B93B177B55445F513D73FF1F0F30376D6EC181BCC1BD5CD19CCCB970F4EE0D2] = true; // faith\\r\\n        blacklistedFields[0xF26868AFB399D3023E79FA44EF170111F5A24802FC72E67895AFB3F21E643D03] = true; // beliefs\\r\\n        blacklistedFields[0x6506DA55E434CC2750E73A988466A1E79A6DBECBF7DB7E0B0B1A9A4E6B255990] = true; // union_member\\r\\n        blacklistedFields[0x95EC00D6978967FCB5DBE9503A80ECC3CB6FFF72260D487785D39D661E5B59B9] = true; // labor_union\\r\\n        blacklistedFields[0xA0F654C753E25A17A44DA09F3D1EA0DA1699352F70FC9676BD1988CC42C77F9C] = true; // dna_data\\r\\n        blacklistedFields[0x4476E4C39678D4B41598A27487939AA5FB6F0A34DD75615EA0F2FDC3AD45AF7C] = true; // genetic_info\\r\\n        blacklistedFields[0x07976C2962ABB79647D29793202FECEE3D12A5C476DC9F3CFE322C5DABD8D833] = true; // genetic_code\\r\\n        blacklistedFields[0x44863B03E9909B7100E05B02526909A346FD7455183F6619E0FE6198C89981E0] = true; // fingerprint\\r\\n        blacklistedFields[0xE33FAE9F9AC1793A36D449AA25BA22CBC0748721BF1D4086D92581E8FFF9706F] = true; // iris_scan\\r\\n        blacklistedFields[0xE9E08ADF4A878A37BC2BAA9EA24FABF533076045D996DA9AAF5F4765D4266AA5] = true; // face_scan\\r\\n        blacklistedFields[0x0BD025A21DFF5177FB5A00614B6BC9C4E901CB58AD4EF08F5D983153E89B21C1] = true; // voice_pattern\\r\\n        blacklistedFields[0xFDF2E20AF1F856577C4DA7BBDD112E00E3203F1891517E0E48521D756AF397E1] = true; // medical_history\\r\\n        blacklistedFields[0xAE9C43435AFD35DA8B56911AA4F9D6810583BC5B34341336096698CC9BEB9794] = true; // health_status\\r\\n        blacklistedFields[0xD296ADD506BBA3096A4FC9610F514B5149710F4BCAD72F0CD5C4C7E7B45B1A1E] = true; // disability\\r\\n        blacklistedFields[0x8AF6DAD4C4ED3AD08A7DD9F7A6A44E7BC2D0DCF33CD8F73CBE66E6534A369EB8] = true; // sexual_orientation\\r\\n        blacklistedFields[0x4153081F8EA65A3D6A778C803906075523A42769DA29A297D97AB03DFD7EF27B] = true; // sexual_preference\\r\\n        blacklistedFields[0x950DDB2960435690C9EBF10604B5C24CAB994C7460EB0F2425881DAC74FC2B4E] = true; // sex_life\\r\\n        blacklistedFields[0xCE5F28B261D6DC9BE110CBB9D067FAF11BEC284ACD10BFE7170292C56DC01893] = true; // partner_gender\\r\\n\\r\\n    }\\r\\n\\r\\n    /// @notice Checks if any of the provided field hashes are blacklisted\\r\\n    /// @param fieldHashes An array of hashed field names to check for GDPR compliance\\r\\n    /// @return Returns false if any field is blacklisted, true otherwise!\\r\\n    function isCompliant(bytes32[] calldata fieldHashes) external view returns (bool) {\\r\\n        for (uint i = 0; i < fieldHashes.length; i++) {\\r\\n            if (blacklistedFields[fieldHashes[i]]) {\\r\\n                return false;\\r\\n            }\\r\\n        }\\r\\n        return true;\\r\\n    }\\r\\n}\",\"keccak256\":\"0xae0421a1e2512f0071df3d452e81664cb99a9f561cc8b54d3080bae66f98c794\",\"license\":\"MIT\"}},\"version\":1}",
+  "bytecode": "0x608060405234801561001057600080fd5b5033600160006101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff16021790555060016000807f129ce50dd90bf244858763d3f10932a9f6d8a521ad4f2c946574e9a566e0405460001b815260200190815260200160002060006101000a81548160ff02191690831515021790555060016000807f78d733c8223cae0a13cd2ceb2c81f589328808c6bf4ff1f99c5dba85cb1969ad60001b815260200190815260200160002060006101000a81548160ff02191690831515021790555060016000807f14b40940148bc14c3643ff50290381b671590987f20d23d81296329fdfba2f7060001b815260200190815260200160002060006101000a81548160ff02191690831515021790555060016000807f5d3575d1a0ab5b2f5ee09a5e4fbae19bcaa9f9343659aa29603b2cbc9ab5d99d60001b815260200190815260200160002060006101000a81548160ff02191690831515021790555060016000807f4e50d0e7d9a419fad99f94c8e1db70a6197328f9b00debaacc8059c01585ca7760001b815260200190815260200160002060006101000a81548160ff02191690831515021790555060016000807f139d14b61cae91c759a05e3f8ece2128cdc1b43d95fd48b9038000d9c1c9c17860001b815260200190815260200160002060006101000a81548160ff02191690831515021790555060016000807f2b93b177b55445f513d73ff1f0f30376d6ec181bcc1bd5cd19cccb970f4ee0d260001b815260200190815260200160002060006101000a81548160ff02191690831515021790555060016000807ff26868afb399d3023e79fa44ef170111f5a24802fc72e67895afb3f21e643d0360001b815260200190815260200160002060006101000a81548160ff02191690831515021790555060016000807f6506da55e434cc2750e73a988466a1e79a6dbecbf7db7e0b0b1a9a4e6b25599060001b815260200190815260200160002060006101000a81548160ff02191690831515021790555060016000807f95ec00d6978967fcb5dbe9503a80ecc3cb6fff72260d487785d39d661e5b59b960001b815260200190815260200160002060006101000a81548160ff02191690831515021790555060016000807fa0f654c753e25a17a44da09f3d1ea0da1699352f70fc9676bd1988cc42c77f9c60001b815260200190815260200160002060006101000a81548160ff02191690831515021790555060016000807f4476e4c39678d4b41598a27487939aa5fb6f0a34dd75615ea0f2fdc3ad45af7c60001b815260200190815260200160002060006101000a81548160ff02191690831515021790555060016000807f07976c2962abb79647d29793202fecee3d12a5c476dc9f3cfe322c5dabd8d83360001b815260200190815260200160002060006101000a81548160ff02191690831515021790555060016000807f44863b03e9909b7100e05b02526909a346fd7455183f6619e0fe6198c89981e060001b815260200190815260200160002060006101000a81548160ff02191690831515021790555060016000807fe33fae9f9ac1793a36d449aa25ba22cbc0748721bf1d4086d92581e8fff9706f60001b815260200190815260200160002060006101000a81548160ff02191690831515021790555060016000807fe9e08adf4a878a37bc2baa9ea24fabf533076045d996da9aaf5f4765d4266aa560001b815260200190815260200160002060006101000a81548160ff02191690831515021790555060016000807f0bd025a21dff5177fb5a00614b6bc9c4e901cb58ad4ef08f5d983153e89b21c160001b815260200190815260200160002060006101000a81548160ff02191690831515021790555060016000807ffdf2e20af1f856577c4da7bbdd112e00e3203f1891517e0e48521d756af397e160001b815260200190815260200160002060006101000a81548160ff02191690831515021790555060016000807fae9c43435afd35da8b56911aa4f9d6810583bc5b34341336096698cc9beb979460001b815260200190815260200160002060006101000a81548160ff02191690831515021790555060016000807fd296add506bba3096a4fc9610f514b5149710f4bcad72f0cd5c4c7e7b45b1a1e60001b815260200190815260200160002060006101000a81548160ff02191690831515021790555060016000807f8af6dad4c4ed3ad08a7dd9f7a6a44e7bc2d0dcf33cd8f73cbe66e6534a369eb860001b815260200190815260200160002060006101000a81548160ff02191690831515021790555060016000807f4153081f8ea65a3d6a778c803906075523a42769da29a297d97ab03dfd7ef27b60001b815260200190815260200160002060006101000a81548160ff02191690831515021790555060016000807f950ddb2960435690c9ebf10604b5c24cab994c7460eb0f2425881dac74fc2b4e60001b815260200190815260200160002060006101000a81548160ff02191690831515021790555060016000807fce5f28b261d6dc9be110cbb9d067faf11bec284acd10bfe7170292c56dc0189360001b815260200190815260200160002060006101000a81548160ff0219169083151502179055506102d6806107b16000396000f3fe608060405234801561001057600080fd5b50600436106100365760003560e01c80638da5cb5b1461003b5780639bcc852514610059575b600080fd5b610043610089565b6040516100509190610164565b60405180910390f35b610073600480360381019061006e91906101ee565b6100af565b6040516100809190610256565b60405180910390f35b600160009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1681565b600080600090505b83839050811015610117576000808585848181106100d8576100d7610271565b5b90506020020135815260200190815260200160002060009054906101000a900460ff161561010a57600091505061011d565b80806001019150506100b7565b50600190505b92915050565b600073ffffffffffffffffffffffffffffffffffffffff82169050919050565b600061014e82610123565b9050919050565b61015e81610143565b82525050565b60006020820190506101796000830184610155565b92915050565b600080fd5b600080fd5b600080fd5b600080fd5b600080fd5b60008083601f8401126101ae576101ad610189565b5b8235905067ffffffffffffffff8111156101cb576101ca61018e565b5b6020830191508360208202830111156101e7576101e6610193565b5b9250929050565b600080602083850312156102055761020461017f565b5b600083013567ffffffffffffffff81111561022357610222610184565b5b61022f85828601610198565b92509250509250929050565b60008115159050919050565b6102508161023b565b82525050565b600060208201905061026b6000830184610247565b92915050565b7f4e487b7100000000000000000000000000000000000000000000000000000000600052603260045260246000fdfea2646970667358221220602c781b72c3a91bd1e4f22ea3344a3075066588ae84802b0b620c9cd71f8eba64736f6c634300081c0033",
+  "deployedBytecode": "0x608060405234801561001057600080fd5b50600436106100365760003560e01c80638da5cb5b1461003b5780639bcc852514610059575b600080fd5b610043610089565b6040516100509190610164565b60405180910390f35b610073600480360381019061006e91906101ee565b6100af565b6040516100809190610256565b60405180910390f35b600160009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1681565b600080600090505b83839050811015610117576000808585848181106100d8576100d7610271565b5b90506020020135815260200190815260200160002060009054906101000a900460ff161561010a57600091505061011d565b80806001019150506100b7565b50600190505b92915050565b600073ffffffffffffffffffffffffffffffffffffffff82169050919050565b600061014e82610123565b9050919050565b61015e81610143565b82525050565b60006020820190506101796000830184610155565b92915050565b600080fd5b600080fd5b600080fd5b600080fd5b600080fd5b60008083601f8401126101ae576101ad610189565b5b8235905067ffffffffffffffff8111156101cb576101ca61018e565b5b6020830191508360208202830111156101e7576101e6610193565b5b9250929050565b600080602083850312156102055761020461017f565b5b600083013567ffffffffffffffff81111561022357610222610184565b5b61022f85828601610198565b92509250509250929050565b60008115159050919050565b6102508161023b565b82525050565b600060208201905061026b6000830184610247565b92915050565b7f4e487b7100000000000000000000000000000000000000000000000000000000600052603260045260246000fdfea2646970667358221220602c781b72c3a91bd1e4f22ea3344a3075066588ae84802b0b620c9cd71f8eba64736f6c634300081c0033",
+  "devdoc": {
+    "author": "Omitul Islam",
+    "details": "Uses a mapping of hashed field names to determine non-compliance",
+    "kind": "dev",
+    "methods": {
+      "isCompliant(bytes32[])": {
+        "params": {
+          "fieldHashes": "An array of hashed field names to check for GDPR compliance"
+        },
+        "returns": {
+          "_0": "Returns false if any field is blacklisted, true otherwise!"
+        }
+      }
+    },
+    "title": "Task 1 GDPR Compliance Validator",
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {
+      "constructor": {
+        "notice": "Initializes the contract, sets the owner, and populates the blacklist with hardcoded hashes"
+      },
+      "isCompliant(bytes32[])": {
+        "notice": "Checks if any of the provided field hashes are blacklisted"
+      },
+      "owner()": {
+        "notice": "The address of the contract deployer (owner)"
+      }
+    },
+    "notice": "Validates that provided hashed field names are not in the predefined blacklist",
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 185,
+        "contract": "contracts/task1.sol:Task1",
+        "label": "blacklistedFields",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_mapping(t_bytes32,t_bool)"
+      },
+      {
+        "astId": 188,
+        "contract": "contracts/task1.sol:Task1",
+        "label": "owner",
+        "offset": 0,
+        "slot": "1",
+        "type": "t_address"
+      }
+    ],
+    "types": {
+      "t_address": {
+        "encoding": "inplace",
+        "label": "address",
+        "numberOfBytes": "20"
+      },
+      "t_bool": {
+        "encoding": "inplace",
+        "label": "bool",
+        "numberOfBytes": "1"
+      },
+      "t_bytes32": {
+        "encoding": "inplace",
+        "label": "bytes32",
+        "numberOfBytes": "32"
+      },
+      "t_mapping(t_bytes32,t_bool)": {
+        "encoding": "mapping",
+        "key": "t_bytes32",
+        "label": "mapping(bytes32 => bool)",
+        "numberOfBytes": "32",
+        "value": "t_bool"
+      }
+    }
+  }
+}

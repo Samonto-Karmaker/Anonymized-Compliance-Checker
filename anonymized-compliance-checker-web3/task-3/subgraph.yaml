@@ -1,0 +1,32 @@
+specVersion: 1.3.0
+indexerHints:
+  prune: auto
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: Task3
+    network: sepolia
+    source:
+      address: "0x13aCaFe0c2013B40C8B66fA35B3Cf5Be61714784"
+      abi: Task3
+      startBlock: 8416385
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - CreationHashUpdated
+        - OwnershipTransferred
+        - UpdateHashUpdated
+      abis:
+        - name: Task3
+          file: ./abis/Task3.json
+      eventHandlers:
+        - event: CreationHashUpdated(indexed uint256,string)
+          handler: handleCreationHashUpdated
+        - event: OwnershipTransferred(indexed address,indexed address)
+          handler: handleOwnershipTransferred
+        - event: UpdateHashUpdated(indexed uint256,string)
+          handler: handleUpdateHashUpdated
+      file: ./src/task-3.ts
