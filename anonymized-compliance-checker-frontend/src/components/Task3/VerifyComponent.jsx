@@ -41,7 +41,7 @@ const VerifyComponent = () => {
     error: allError,
     isFetching: allLoading,
     refetch: refetchAll,
-  } = useVerifyAllBatchesQuery(undefined, { skip: true });
+  } = useVerifyAllBatchesQuery(undefined, { skip: false });
 
   const handleCreationIdVerification = async () => {
     setLoadingCreationIdVerification(true);
@@ -97,21 +97,9 @@ const VerifyComponent = () => {
   const handleVerifyAll = async () => {
     setLoadingVerifyAll(true);
     try {
-      const response = await fetch("http://localhost:3000/task3/batch/verify/all", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Verification failed.");
-      }
-      const data = await response.json();
-
-      if (data) {
-        setVerifyAllMessage(data);
+      const response = await refetchAll();
+      if (response?.data) {
+        setVerifyAllMessage(response.data);
         setVerifyAllStatus("success");
       } else {
         setVerifyAllMessage({ error: "Verification failed." });
@@ -231,15 +219,15 @@ const VerifyComponent = () => {
                 {verifyAllMessage && (
                   <>
                     <span className="text-sm font-bold">Result:</span>
-                  <div
-                  className={`text-sm my-2 rounded p-4 ${
-                    verifyAllStatus === "success"
-                      ? "border-green-500 bg-green-50 text-green-700"
-                      : verifyAllStatus === "error"
-                      ? "border-red-500 bg-red-50 text-red-700"
-                      : "border-gray-300 text-gray-700"
-                  }`}
-                >
+                    <div
+                      className={`text-sm my-2 rounded p-4 ${
+                        verifyAllStatus === "success"
+                          ? "border-green-500 bg-green-50 text-green-700"
+                          : verifyAllStatus === "error"
+                          ? "border-red-500 bg-red-50 text-red-700"
+                          : "border-gray-300 text-gray-700"
+                      }`}
+                    >
                       {"error" in verifyAllMessage ? (
                         <p>{verifyAllMessage.error}</p>
                       ) : (
@@ -254,7 +242,9 @@ const VerifyComponent = () => {
                           </li>
                           <li>
                             <strong>Creation Hash Verified:</strong>{" "}
-                            {verifyAllMessage.creationHashVerified ? "Yes" : "No"}
+                            {verifyAllMessage.creationHashVerified
+                              ? "Yes"
+                              : "No"}
                           </li>
                           <li>
                             <strong>Update Hash Verified:</strong>{" "}
