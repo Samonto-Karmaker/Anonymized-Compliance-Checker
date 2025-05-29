@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-
 const baseUrl = process.env.REACT_APP_API_BASE_URL;
+console.log("Base URL:", baseUrl);
 
 export const contract_api = createApi({
     reducerPath: "contract_api",
@@ -46,7 +46,7 @@ export const contract_api = createApi({
 
       getHashByCreationId: builder.query({
          query: (id) => ({
-            url: `/task3/hash/creation/${id}`,
+            url: `/task3/batch/verify/creation/${id}`,
             method: "GET",
         }),
         invalidatesTags: ["Contract"]
@@ -54,7 +54,7 @@ export const contract_api = createApi({
 
       getHashByUpdateId:builder.query({
          query: (id) => ({
-            url: `/task3/hash/update/${id}`,
+            url: `/task3/batch/verify/update/${id}`,
             method: "GET",
         }),
         invalidatesTags: ["Contract"]

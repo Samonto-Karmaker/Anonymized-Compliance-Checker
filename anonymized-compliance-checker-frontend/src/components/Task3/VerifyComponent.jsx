@@ -56,14 +56,14 @@ const VerifyComponent = () => {
       }
     } catch (err) {
       let errorMessage = "Something went wrong.";
-        if (err?.response?.data?.message) {
-         errorMessage = `Error: ${err.response.data.message}`;
-     } else if (err?.message) {
-       errorMessage = `Error: ${err.message}`;
-  }
+      if (err?.response?.data?.message) {
+        errorMessage = `Error: ${err.response.data.message}`;
+      } else if (err?.message) {
+        errorMessage = `Error: ${err.message}`;
+      }
 
-  setCreationIdMessage(errorMessage);
-  setCreationIdStatus("error");
+      setCreationIdMessage(errorMessage);
+      setCreationIdStatus("error");
     }
     setLoadingCreationIdVerification(false);
   };
@@ -72,6 +72,7 @@ const VerifyComponent = () => {
     setLoadingUpdatedIdVerification(true);
     try {
       const res = await refetchUpdate();
+      console.log("refetchAll result:", res);
       if (res.data) {
         setUpdatedIdMessage("Update ID hash verified.");
         setUpdatedIdStatus("success");
@@ -82,13 +83,13 @@ const VerifyComponent = () => {
     } catch (err) {
       let errorMessage = "Something went wrong.";
 
-  if (err?.response?.data?.message) {
-    errorMessage = `Error: ${err.response.data.message}`;
-  } else if (err?.message) {
-    errorMessage = `Error: ${err.message}`;
-  }
-     setUpdatedIdMessage(errorMessage);
-     setUpdatedIdStatus("error");
+      if (err?.response?.data?.message) {
+        errorMessage = `Error: ${err.response.data.message}`;
+      } else if (err?.message) {
+        errorMessage = `Error: ${err.message}`;
+      }
+      setUpdatedIdMessage(errorMessage);
+      setUpdatedIdStatus("error");
     }
     setLoadingUpdatedIdVerification(false);
   };
@@ -96,26 +97,35 @@ const VerifyComponent = () => {
   const handleVerifyAll = async () => {
     setLoadingVerifyAll(true);
     try {
-      const res = await refetchAll();
-      if (res.data) {
-        setVerifyAllMessage(res.data);
+      const response = await fetch("http://localhost:3000/task3/batch/verify/all", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Verification failed.");
+      }
+      const data = await response.json();
+
+      if (data) {
+        setVerifyAllMessage(data);
         setVerifyAllStatus("success");
       } else {
         setVerifyAllMessage({ error: "Verification failed." });
         setVerifyAllStatus("error");
       }
     } catch (err) {
-       let errorMessage = "Something went wrong.";
-        if (err?.response?.data?.message) {
-          errorMessage = `Error: ${err.response.data.message}`;
-        } else if (err?.message) {
-          errorMessage = `Error: ${err.message}`;
-        }
-
-        setVerifyAllMessage({ error: errorMessage });
-        setVerifyAllStatus("error");
-       }
-       setLoadingVerifyAll(false);
+      let errorMessage = "Something went wrong.";
+      if (err?.message) {
+        errorMessage = `Error: ${err.message}`;
+      }
+      setVerifyAllMessage({ error: errorMessage });
+      setVerifyAllStatus("error");
+    }
+    setLoadingVerifyAll(false);
   };
 
   return (
@@ -124,8 +134,7 @@ const VerifyComponent = () => {
       <div className="bg-white p-6 rounded-lg shadow-md">
         <div className="mb-4">
           <div className="flex flex-col gap-4 w-full">
-            {/* Creation Inventory ID */}
-            <div className="flex w-full  space-x-2 items-end justify-center">
+            <div className="flex w-full space-x-2 items-end justify-center">
               <div className="flex-1 flex flex-col">
                 <label htmlFor="id" className="text-sm text-gray-700 mb-1">
                   Enter Creation Inventory ID
@@ -168,7 +177,6 @@ const VerifyComponent = () => {
               </button>
             </div>
 
-            {/* Updated Inventory ID */}
             <div className="flex w-full space-x-2 items-end justify-center">
               <div className="flex-1 flex flex-col">
                 <label
@@ -215,49 +223,49 @@ const VerifyComponent = () => {
               </button>
             </div>
 
-            {/* verify all */}
-            <div className="flex items-center">
-              <span className="text-sm text-gray-700 mr-2">
-                Click Here to Verify All:
-              </span>
-              {verifyAllMessage && (
-                <>
-                  <span className="text-sm font-bold">Result:</span>
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-700">
+                  Click Here to Verify All:
+                </span>
+                {verifyAllMessage && (
+                  <>
+                    <span className="text-sm font-bold">Result:</span>
                   <div
-                    className={`text-sm my-2 rounded p-2 ${
-                      verifyAllStatus === "success"
-                        ? "border-green-500 bg-green-50 text-green-700"
-                        : verifyAllStatus === "error"
-                        ? "border-red-500 bg-red-50 text-red-700"
-                        : "border-gray-300 text-gray-700"
-                    }`}
-                  >
-                    {"error" in verifyAllMessage ? (
-                      <p>{verifyAllMessage.error}</p>
-                    ) : (
-                      <ul className="list-disc list-inside space-y-1">
-                        <li>
-                          <strong>Untracked Creations:</strong>{" "}
-                          {verifyAllMessage.untrackedCreation}
-                        </li>
-                        <li>
-                          <strong>Untracked Updates:</strong>{" "}
-                          {verifyAllMessage.untrackedUpdate}
-                        </li>
-                        <li>
-                          <strong>Creation Hash Verified:</strong>{" "}
-                          {verifyAllMessage.creationHashVerified ? "Yes" : "No"}
-                        </li>
-                        <li>
-                          <strong>Update Hash Verified:</strong>{" "}
-                          {verifyAllMessage.updateHashVerified ? "Yes" : "No"}
-                        </li>
-                      </ul>
-                    )}
-                  </div>
-                </>
-              )}
-
+                  className={`text-sm my-2 rounded p-4 ${
+                    verifyAllStatus === "success"
+                      ? "border-green-500 bg-green-50 text-green-700"
+                      : verifyAllStatus === "error"
+                      ? "border-red-500 bg-red-50 text-red-700"
+                      : "border-gray-300 text-gray-700"
+                  }`}
+                >
+                      {"error" in verifyAllMessage ? (
+                        <p>{verifyAllMessage.error}</p>
+                      ) : (
+                        <ul className="list-disc list-inside space-y-2">
+                          <li>
+                            <strong>Untracked Creations:</strong>{" "}
+                            {verifyAllMessage.untrackedCreation}
+                          </li>
+                          <li>
+                            <strong>Untracked Updates:</strong>{" "}
+                            {verifyAllMessage.untrackedUpdate}
+                          </li>
+                          <li>
+                            <strong>Creation Hash Verified:</strong>{" "}
+                            {verifyAllMessage.creationHashVerified ? "Yes" : "No"}
+                          </li>
+                          <li>
+                            <strong>Update Hash Verified:</strong>{" "}
+                            {verifyAllMessage.updateHashVerified ? "Yes" : "No"}
+                          </li>
+                        </ul>
+                      )}
+                    </div>
+                  </>
+                )}
+              </div>
               <button
                 type="button"
                 onClick={handleVerifyAll}
