@@ -1,4 +1,9 @@
 import React, { useState } from "react";
+import {
+  useGetHashByCreationIdQuery,
+  useGetHashByUpdateIdQuery,
+  useVerifyAllBatchesQuery,
+} from "../../services/contract_api";
 
 const VerifyComponent = () => {
   const [creationId, setCreationId] = useState("");
@@ -17,9 +22,101 @@ const VerifyComponent = () => {
   const [verifyAllMessage, setVerifyAllMessage] = useState();
   const [verifyAllStatus, setVerifyAllStatus] = useState("");
 
-  const handleCreationIdVerification = async () => {};
-  const handleUpdatedIdVerification = async () => {};
-  const handleVerifyAll = async () => {};
+  const {
+    data: creationData,
+    error: creationError,
+    isLoading: creationLoading,
+    refetch: refetchCreation,
+  } = useGetHashByCreationIdQuery(creationId, { skip: !creationId });
+
+  const {
+    data: updateData,
+    error: updateError,
+    isLoading: updateLoading,
+    refetch: refetchUpdate,
+  } = useGetHashByUpdateIdQuery(updatedId, { skip: !updatedId });
+
+  const {
+    data: allData,
+    error: allError,
+    isFetching: allLoading,
+    refetch: refetchAll,
+  } = useVerifyAllBatchesQuery(undefined, { skip: true });
+
+  const handleCreationIdVerification = async () => {
+    setLoadingCreationIdVerification(true);
+    try {
+      const res = await refetchCreation();
+      if (res.data) {
+        setCreationIdMessage("Creation ID hash verified.");
+        setCreationIdStatus("success");
+      } else {
+        setCreationIdMessage("Verification failed.");
+        setCreationIdStatus("error");
+      }
+    } catch (err) {
+      let errorMessage = "Something went wrong.";
+        if (err?.response?.data?.message) {
+         errorMessage = `Error: ${err.response.data.message}`;
+     } else if (err?.message) {
+       errorMessage = `Error: ${err.message}`;
+  }
+
+  setCreationIdMessage(errorMessage);
+  setCreationIdStatus("error");
+    }
+    setLoadingCreationIdVerification(false);
+  };
+
+  const handleUpdatedIdVerification = async () => {
+    setLoadingUpdatedIdVerification(true);
+    try {
+      const res = await refetchUpdate();
+      if (res.data) {
+        setUpdatedIdMessage("Update ID hash verified.");
+        setUpdatedIdStatus("success");
+      } else {
+        setUpdatedIdMessage("Verification failed.");
+        setUpdatedIdStatus("error");
+      }
+    } catch (err) {
+      let errorMessage = "Something went wrong.";
+
+  if (err?.response?.data?.message) {
+    errorMessage = `Error: ${err.response.data.message}`;
+  } else if (err?.message) {
+    errorMessage = `Error: ${err.message}`;
+  }
+     setUpdatedIdMessage(errorMessage);
+     setUpdatedIdStatus("error");
+    }
+    setLoadingUpdatedIdVerification(false);
+  };
+
+  const handleVerifyAll = async () => {
+    setLoadingVerifyAll(true);
+    try {
+      const res = await refetchAll();
+      if (res.data) {
+        setVerifyAllMessage(res.data);
+        setVerifyAllStatus("success");
+      } else {
+        setVerifyAllMessage({ error: "Verification failed." });
+        setVerifyAllStatus("error");
+      }
+    } catch (err) {
+       let errorMessage = "Something went wrong.";
+        if (err?.response?.data?.message) {
+          errorMessage = `Error: ${err.response.data.message}`;
+        } else if (err?.message) {
+          errorMessage = `Error: ${err.message}`;
+        }
+
+        setVerifyAllMessage({ error: errorMessage });
+        setVerifyAllStatus("error");
+       }
+       setLoadingVerifyAll(false);
+  };
 
   return (
     <div>
@@ -120,7 +217,9 @@ const VerifyComponent = () => {
 
             {/* verify all */}
             <div className="flex items-center">
-             <span className="text-sm text-gray-700 mr-2">Click Here to Verify All:</span>
+              <span className="text-sm text-gray-700 mr-2">
+                Click Here to Verify All:
+              </span>
               {verifyAllMessage && (
                 <>
                   <span className="text-sm font-bold">Result:</span>
@@ -161,7 +260,7 @@ const VerifyComponent = () => {
 
               <button
                 type="button"
-                onClick={handleVerifyAll} // Changed to the correct handler
+                onClick={handleVerifyAll}
                 disabled={loadingVerifyAll}
                 className={`h-[32px] self-start px-3 py-1 text-sm text-white rounded ${
                   loadingVerifyAll

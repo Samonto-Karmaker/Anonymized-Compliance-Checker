@@ -42,14 +42,40 @@ export const contract_api = createApi({
             body: data
         }),
         invalidatesTags: ["Contract"]
-      })
+      }),
+
+      getHashByCreationId: builder.query({
+         query: (id) => ({
+            url: `/task3/hash/creation/${id}`,
+            method: "GET",
+        }),
+        invalidatesTags: ["Contract"]
+      }),
+
+      getHashByUpdateId:builder.query({
+         query: (id) => ({
+            url: `/task3/hash/update/${id}`,
+            method: "GET",
+        }),
+        invalidatesTags: ["Contract"]
+      }),
+
+      verifyAllBatches: builder.query({
+         query: () => ({
+            url: `/task3/batch/verify/all`,
+            method: "GET",
+        }),
+        invalidatesTags: ["Contract"]
+      }),
     })
 })
-
 
 export const {
     useCheckTask1Mutation,
     useCheckTask2Mutation,
     useCreateTask3Mutation,
-    useUpdateTask3Mutation
+    useUpdateTask3Mutation,
+    useGetHashByCreationIdQuery,
+    useGetHashByUpdateIdQuery,
+    useVerifyAllBatchesQuery
 } = contract_api;

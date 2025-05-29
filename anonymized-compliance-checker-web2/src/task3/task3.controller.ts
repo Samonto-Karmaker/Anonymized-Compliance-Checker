@@ -78,6 +78,7 @@ export class Task3Controller {
             parsedId
         )
     }
+
     @Get("batch/verify/all")
     async verifyAllBatches() {
         return await this.task3BatchService.verifyAll()
