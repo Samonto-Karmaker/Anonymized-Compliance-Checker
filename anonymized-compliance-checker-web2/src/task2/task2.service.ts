@@ -62,7 +62,7 @@ export class Task2Service {
                         maskNumber
                     ),
                 }))
-            // console.log("data => ",dateObjs);
+            console.log("data => ",dateObjs);
             try {
                 const contract = this.task2ContractService.getContract()
                 await contract.validate(dateObjs)

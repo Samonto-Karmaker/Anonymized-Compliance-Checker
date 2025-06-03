@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useCheckTask2Mutation } from "../services/contract_api";
 
 const Task2Component = () => {
@@ -8,18 +8,35 @@ const Task2Component = () => {
 
   const [result2Status, setResult2Status] = useState("idle");
 
-  const [checkTask2, { isLoading: loading2 }] = useCheckTask2Mutation();
+  const [checkTask2, { isLoading: loading2,isSuccess:isSuccessCheckTask2 }] = useCheckTask2Mutation();
+
+  // useEffect(()=>{
+  //   if(isSuccessCheckTask2){
+  //     setResult2("Task 2 Completed Successfully.");
+  //     setResult2Status("success");
+
+  //   }else{
+  //     setResult2("Error: " + ( "Something went wrong."));
+  //     setResult2Status("error");
+  //   }
+  // },[isSuccessCheckTask2])
 
   const handleCheckTask2 = async () => {
     setResult2("");
     setResult2Status("idle");
     try {
-      const response = await checkTask2({ batchSize }).unwrap();
-      setResult2(response.message || "Task 2 Completed Successfully.");
-      setResult2Status("success");
+      console.log("re ",batchSize)
+      const response = await checkTask2( batchSize ).unwrap();
+      if(response.code!=400){
+        setResult2("Task 2 Completed Successfully.");
+        setResult2Status("success");
+      }else{
+        setResult2("Error: " + ( "Validaton failed."));
+        setResult2Status("error");
+      }
     } catch (error) {
-      setResult2("Error: " + (error?.data?.message || "Something went wrong."));
-      setResult2Status("error");
+        setResult2("Error: " + ( "Something went wrong."));
+        setResult2Status("error");
     }
   };
   return (
