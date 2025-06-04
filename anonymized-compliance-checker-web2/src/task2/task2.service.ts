@@ -65,9 +65,12 @@ export class Task2Service {
             // console.log("data => ",dateObjs);
             try {
                 const contract = this.task2ContractService.getContract()
+                console.log(`Validation passed for batch no ${batchNumber}`);
                 await contract.validate(dateObjs)
             } catch (err) {
                 // console.log("Task 2 service error => ", err)
+                console.log(`Validation failed for batch no ${batchNumber}`);
+
                 return {
                     msg: `Validation failed for batch no ${batchNumber}!`,
                     code: 400,
