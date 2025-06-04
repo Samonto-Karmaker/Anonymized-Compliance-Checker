@@ -8,25 +8,25 @@ const Task2Component = () => {
 
   const [result2Status, setResult2Status] = useState("idle");
 
-  const [checkTask2, { isLoading: loading2,isSuccess:isSuccessCheckTask2 }] = useCheckTask2Mutation();
+  const [checkTask2, { isLoading: loading2, isSuccess: isSuccessCheckTask2 }] =
+    useCheckTask2Mutation();
 
-  
   const handleCheckTask2 = async () => {
     setResult2("");
     setResult2Status("idle");
     try {
       // console.log("re ",batchSize)
-      const response = await checkTask2( batchSize ).unwrap();
-      if(response.code!=400){
+      const response = await checkTask2(batchSize).unwrap();
+      if (response.code != 400) {
         setResult2("Task 2 Completed Successfully.");
         setResult2Status("success");
-      }else{
-        setResult2("Error: " + ( "Validation failed."));
+      } else {
+        setResult2("Error: " + "Validation failed.");
         setResult2Status("error");
       }
     } catch (error) {
-        setResult2("Error: " + ( "Something went wrong."));
-        setResult2Status("error");
+      setResult2("Error: " + "Something went wrong.");
+      setResult2Status("error");
     }
   };
   return (
