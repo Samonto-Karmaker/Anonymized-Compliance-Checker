@@ -26,7 +26,7 @@ contract Task2 {
     /// @notice Validates that the expiry date is more than 6 months after the disbursed date for each item
     /// @dev Reverts with TaskTwo_RulesViolated if any date pair violates the rule
     /// @param dates An array of DateObj structs containing expiry and disbursed dates
-    function validate(DateObj[] memory dates) external pure {
+    function validate(DateObj[] memory dates) external pure returns(bool){
         uint256 n = dates.length;
         for (uint256 i = 0; i < n; i++) {
             uint256 diff = dates[i].expiryDate - dates[i].disbursedDate;
@@ -34,6 +34,7 @@ contract Task2 {
                 revert TaskTwo_RulesViolated();
             }
         }
+        return true;
     }
 
     

@@ -10,28 +10,18 @@ const Task2Component = () => {
 
   const [checkTask2, { isLoading: loading2,isSuccess:isSuccessCheckTask2 }] = useCheckTask2Mutation();
 
-  // useEffect(()=>{
-  //   if(isSuccessCheckTask2){
-  //     setResult2("Task 2 Completed Successfully.");
-  //     setResult2Status("success");
-
-  //   }else{
-  //     setResult2("Error: " + ( "Something went wrong."));
-  //     setResult2Status("error");
-  //   }
-  // },[isSuccessCheckTask2])
-
+  
   const handleCheckTask2 = async () => {
     setResult2("");
     setResult2Status("idle");
     try {
-      console.log("re ",batchSize)
+      // console.log("re ",batchSize)
       const response = await checkTask2( batchSize ).unwrap();
       if(response.code!=400){
         setResult2("Task 2 Completed Successfully.");
         setResult2Status("success");
       }else{
-        setResult2("Error: " + ( "Validaton failed."));
+        setResult2("Error: " + ( "Validation failed."));
         setResult2Status("error");
       }
     } catch (error) {

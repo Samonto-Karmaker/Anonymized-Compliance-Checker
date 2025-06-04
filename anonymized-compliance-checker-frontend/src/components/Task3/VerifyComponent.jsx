@@ -47,11 +47,17 @@ const VerifyComponent = () => {
     setLoadingCreationIdVerification(true);
     try {
       const res = await refetchCreation();
-      if (res.data) {
+      if (res.data === true) {
         setCreationIdMessage("Creation ID hash verified.");
         setCreationIdStatus("success");
-      } else {
+      } else if (res.data === false) {
         setCreationIdMessage("Verification failed.");
+        setCreationIdStatus("error");
+      } else if (res.error?.data?.message) {
+        setCreationIdMessage(`Error: ${res.error.data.message}`);
+        setCreationIdStatus("error");
+      } else {
+        setCreationIdMessage("Something went wrong.");
         setCreationIdStatus("error");
       }
     } catch (err) {
@@ -72,12 +78,17 @@ const VerifyComponent = () => {
     setLoadingUpdatedIdVerification(true);
     try {
       const res = await refetchUpdate();
-      console.log("refetchAll result:", res);
-      if (res.data) {
-        setUpdatedIdMessage("Update ID hash verified.");
+      if (res.data === true) {
+        setUpdatedIdMessage("Creation ID hash verified.");
         setUpdatedIdStatus("success");
-      } else {
+      } else if (res.data === false) {
         setUpdatedIdMessage("Verification failed.");
+        setUpdatedIdStatus("error");
+      } else if (res.error?.data?.message) {
+        setUpdatedIdMessage(`Error: ${res.error.data.message}`);
+        setUpdatedIdStatus("error");
+      } else {
+        setUpdatedIdMessage("Something went wrong.");
         setUpdatedIdStatus("error");
       }
     } catch (err) {
@@ -97,9 +108,22 @@ const VerifyComponent = () => {
   const handleVerifyAll = async () => {
     setLoadingVerifyAll(true);
     try {
-      const response = await refetchAll();
-      if (response?.data) {
-        setVerifyAllMessage(response.data);
+      const response = await fetch("http://localhost:5000/task3/batch/verify/all", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Verification failed.");
+      }
+      const data = await response.json();
+
+      if (data) {
+        console.log("Verify All Response:", data);
+        setVerifyAllMessage(data);
         setVerifyAllStatus("success");
       } else {
         setVerifyAllMessage({ error: "Verification failed." });
@@ -234,21 +258,19 @@ const VerifyComponent = () => {
                         <ul className="list-disc list-inside space-y-2">
                           <li>
                             <strong>Untracked Creations:</strong>{" "}
-                            {verifyAllMessage.untrackedCreation}
+                            {verifyAllMessage.untrackedInventories}
                           </li>
                           <li>
                             <strong>Untracked Updates:</strong>{" "}
-                            {verifyAllMessage.untrackedUpdate}
+                            {verifyAllMessage.inventoriesReadyForUpdate}
                           </li>
                           <li>
-                            <strong>Creation Hash Verified:</strong>{" "}
-                            {verifyAllMessage.creationHashVerified
-                              ? "Yes"
-                              : "No"}
+                            <strong>Creation Batches Verified:</strong>{" "}
+                            {verifyAllMessage.creationBatchesVerified ? "Yes" : "No"}
                           </li>
                           <li>
-                            <strong>Update Hash Verified:</strong>{" "}
-                            {verifyAllMessage.updateHashVerified ? "Yes" : "No"}
+                            <strong>Update Batches Verified:</strong>{" "}
+                            {verifyAllMessage.updateBatchesVerified ? "Yes" : "No"}
                           </li>
                         </ul>
                       )}
